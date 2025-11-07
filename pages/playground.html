@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>At most K-out pollygons- Playground</title>
+		<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+		<link rel="stylesheet" href="../styling.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+		<script defer src="js/geometry.js"></script>
+	</head>
+
+	<body>
+		<header class="site-header card">
+			<div class="title">
+				<div>
+					<h1>At Most k-Out Polygons</h1>
+				</div>
+			</div>
+
+			<nav class="nav">
+				<a href="index.html" onclick="alert('This demo focuses on the Playground page.'); return false;">Home</a>
+				<a href="playground.html">Playground</a>
+				<a href="algorithm.html" onclick="alert('This demo focuses on the Playground page.'); return false;">Algorithm</a>
+				<a href="datasets.html" onclick="alert('This demo focuses on the Playground page.'); return false;">Datasets</a>
+				<a href="about.html" onclick="alert('This demo focuses on the Playground page.'); return false;">About</a>
+			</nav>
+		</header>
+
+		<main class="container">
+			<section class="hero card">
+				<div>
+					<h2>Explore point sets and polygons</h2>
+					<p>Create and manipulate point sets, preview the convex hull, and <strong>at-most k-out polygons.</p>
+				</div>
+			</section>
+
+			<section class="playground">
+				<aside class="panel card">
+					<h3>Controls</h3>
+					<div class="control">
+						<label for="kRange">k: <span id="kValue">2</span></label>
+						<input type="range" id="kRange" min="0" max="20" value="2">
+					</div>
+
+					<div class="control grid1">
+						<button class="seg-btn active" id="mode-view">View</button>
+						<button class="seg-btn" id="mode-edit">Add</button>
+						<button class="seg-btn" id="mode-drag">Drag</button>
+						<button class="seg-btn" id="mode-delete">Delete</button>
+					</div>
+
+					<div class="control grid2">
+						<button class="btn primary" id="btn-random">Random set</button>
+						<button class="btn" id="btn-k-out">Show one k-Out Polygon</button>
+					</div>
+
+					<div class="control grid3">
+						<button class="btn" id="btn-undo">Undo</button>
+						<button class="btn" id="btn-redo">Redo</button>
+						<button class="btn" id="btn-clear">Clear</button>
+					</div>
+
+
+					<div class="control">
+						<label><input type="checkbox" id="hull" checked> Show convex hull</label>
+						<label><input type="checkbox" id="pt-ids"> Show point ids</label>
+					</div>
+
+					<div class="stats">
+						<div><span>n</span><b id="stat-n">0</b></div>
+						<div><span>k</span><b id="stat-k">2</b></div>
+						<div><span>Hull</span><b id="stat-h">0</b></div>
+					</div>
+				</aside>
+
+				<section class="canvas card">
+					<div id="canvas-container"></div>
+				</section>	
+
+				<aside class="panel card">
+					<h3>Tips</h3>
+					<ul class="tips">
+						<li><b>Add</b> mode: click on the canvas to add a point.</li>
+						<li><b>Drag</b> mode: grab a point to move it.</li>
+						<li><b>Delete</b> mode: click on a point in the canvas to remove it.</li>
+						<li>Toggle the hull and labels to inspect the set.</li>
+					</ul>
+				</aside>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			<p>© <span id="year"></span> At Most k-Out Polygons</p>
+		</footer>
+	</body>
+</html>
