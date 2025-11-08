@@ -1,11 +1,11 @@
-class Point {
+export class Point {
 	constructor(x, y) {
 		this.x = x;
 		this.y = y;
 	}
 }
 
-class Polygon {
+export class Polygon {
 	constructor(points) {
 		this.points = points;
 		this.sortPoints();
@@ -41,7 +41,7 @@ class Polygon {
 	}
 }
 
-class Triangle {
+export class Triangle {
 	constructor(a, b, c) {
 		this.a = a;
 		this.b = b;
@@ -67,21 +67,21 @@ class Triangle {
 	}
 }
 
-function orient(A, B, C) {
+export function orient(A, B, C) {
 	const det = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
 	return det;
 }
 
-function isLeftTurn(orient_det) { return orient_det < 0; }
+export function isLeftTurn(orient_det) { return orient_det < 0; }
 
-function isRightTurn(orient_det) { return orient_det > 0; }
+export function isRightTurn(orient_det) { return orient_det > 0; }
 
-function dist(p1, p2) {
+export function dist(p1, p2) {
 	const distance = (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2;
 	return distance;
 }
 
-function cmpDist(p, p1, p2) {
+export function cmpDist(p, p1, p2) {
 	const orientation = orient(p, p1, p2);
 	if (orientation > 0) { return -1;} 
 	else if (orientation < 0) { return 1; }
@@ -94,7 +94,7 @@ function cmpDist(p, p1, p2) {
 	else { return 0; }
 }
 
-function convexHullGrahamScan(polygon) {
+export function convexHullGrahamScan(polygon) {
 	p0 = polygon.get_point(0);
 	var hull = [];
 
