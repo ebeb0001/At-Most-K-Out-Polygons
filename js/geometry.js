@@ -105,5 +105,5 @@ export function convexHullGrahamScan(polygon) {
 		}
 		hull.push(p);
 	}
-	return hull;
+	return new Polygon(hull);
 }

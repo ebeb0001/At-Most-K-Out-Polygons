@@ -13,6 +13,7 @@ const state = {
 };
 
 let canvas;
+let dragIndex = -1;
 
 const $ = (id) => document.getElementById(id);
 window.addEventListener('load', () => {
@@ -75,9 +76,31 @@ function mousePressed() {
     const insideCanvas = mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height;
     if (!insideCanvas) return;
     if (state.mode === 'add') {
-        console.log('Adding point at', mouseX, mouseY);
         state.points.push(new geometry.Point(mouseX, mouseY));
         redrawAndStats();
+    } else if (state.mode === 'drag') {
+        dragIndex = findNearestPoint(mouseX, mouseY);
+    } else if (state.mode === 'delete') {
+        const idx = findNearestPoint(mouseX, mouseY);
+        if (idx !== -1) {
+            state.points.splice(idx, 1);
+            redrawAndStats();
+        }
+    }
+}
+
+function mouseDragged() {
+    if (state.mode === 'drag' && dragIndex !== -1) {
+        state.points[dragIndex].x = mouseX;
+        state.points[dragIndex].y = mouseY;
+        redrawAndStats();
+    }
+}
+
+function mouseReleased() {
+    if (state.mode === 'drag' && dragIndex !== -1) {
+        redrawAndStats();
+        dragIndex = -1;
     }
 }
 
@@ -95,7 +118,24 @@ function redrawAndStats() {
     updateStats();
 }
 
+function findNearestPoint(x, y, r = 12) {
+    let idx = -1, best = r * r;
+    for (let i = 0; i < state.points.length; i++) {
+        const p = state.points[i];
+        const dx = p.x - x;
+        const dy = p.y - y;
+        const dist2 = dx * dx + dy * dy;
+        if (dist2 < best) {
+            best = dist2;
+            idx = i;
+        }
+    }
+    return idx;
+}
+
 window.setup = setup;
 window.draw = draw;
 window.windowResized = windowResized;
 window.mousePressed = mousePressed;
+window.mouseDragged = mouseDragged;
+window.mouseReleased = mouseReleased;
