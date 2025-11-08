@@ -31,8 +31,6 @@ function clearCanvas() {
 	state.history = [];
 	state.future = [];
 	state.hull = null;
-	state.showHull = false;
-	state.showLabels = false;
 	setCanvasMode('add');
 	redrawAndStats();
 }
@@ -83,6 +81,11 @@ window.addEventListener('load', () => {
 		state.showHull = e.target.checked; 
 		redrawAndStats();
 	});
+
+	$('pt-ids').addEventListener('change', (e) => { 
+		state.showLabels = e.target.checked; 
+		redrawAndStats();
+	});
 });
 
 function setPrimaryButton(button) {
@@ -126,7 +129,7 @@ function draw() {
 	background(255);
 	noFill();
 	
-	stroke(150);
+	stroke(180);
 	for (let y = 0; y < height; y += 40) { line(0, y, width, y); }
 	for (let x = 0; x < width; x += 40) { line(x, 0, x, height); }
 
@@ -139,9 +142,17 @@ function draw() {
 
 	strokeWeight(1);
 	noStroke();
+	let idx = 1;
 	for (const p of state.points) {
 		fill(24);
 		p.draw();
+		if (state.showLabels) {
+			fill(20);
+			textAlign(LEFT, TOP);
+			textSize(10);
+			text(idx, p.x + 6, p.y + 6);
+		}
+		idx++;
 	}
 
 }
