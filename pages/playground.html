@@ -9,7 +9,7 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-		<script defer src="js/geometry.js"></script>
+		<script defer src="../js/playground.js" type="module"></script>
 	</head>
 
 	<body>
@@ -63,12 +63,17 @@
 						<button class="btn" id="btn-clear">Clear</button>
 					</div>
 
+					<hr>
 
+					<h3>Display options</h3>
 					<div class="control">
 						<label><input type="checkbox" id="hull" checked> Show convex hull</label>
 						<label><input type="checkbox" id="pt-ids"> Show point ids</label>
 					</div>
 
+					<hr>
+
+					<h3>Statistics</h3>
 					<div class="stats">
 						<div><span>n</span><b id="stat-n">0</b></div>
 						<div><span>k</span><b id="stat-k">2</b></div>
