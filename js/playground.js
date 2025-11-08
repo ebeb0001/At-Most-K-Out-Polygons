@@ -15,6 +15,17 @@ const state = {
 let canvas;
 let dragIndex = -1;
 
+function setRandomPreset(nb_points) {
+    const points = [];
+    for (let i = 0; i < nb_points; i++) {
+        points.push(new geometry.Point(
+            Math.floor(Math.random() * (width + 1)), 
+            Math.floor(Math.random() * (height + 1))
+        ));
+    }
+    return points;
+}
+
 const $ = (id) => document.getElementById(id);
 window.addEventListener('load', () => {
     $("year").textContent = new Date().getFullYear();
@@ -30,6 +41,10 @@ window.addEventListener('load', () => {
     $('mode-drag').addEventListener('click', () => setMode('drag'));
     $('mode-delete').addEventListener('click', () => setMode('delete'));
 
+    $('btn-random').addEventListener('click', () => { 
+        state.points = setRandomPreset(Math.floor(Math.random() * 41)); 
+        redrawAndStats(); 
+    });
 });
 
 function setMode(m) {
