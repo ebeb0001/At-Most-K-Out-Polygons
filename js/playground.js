@@ -32,7 +32,7 @@ function clearCanvas() {
 	state.future = [];
 	state.hull = null;
 	setCanvasMode('add');
-	redrawAndStats();
+	drawAndStats();
 }
 
 const $ = (id) => document.getElementById(id);
@@ -53,38 +53,38 @@ window.addEventListener('load', () => {
 	$('btn-random').addEventListener('click', () => { 
 		state.points = setRandomPreset(Math.floor(Math.random() * 41));
 		setPrimaryButton('rand');
-		redrawAndStats(); 
+		drawAndStats(); 
 	});
 
 	$('btn-k-out').addEventListener('click', () => {
 		setPrimaryButton('k-out');
-		redrawAndStats();
+		drawAndStats();
 	});
 
 	$('btn-undo').addEventListener('click', () => { 
 		setPrimaryButton('undo');
-		redrawAndStats(); 
+		drawAndStats(); 
 	});
 
 	$('btn-redo').addEventListener('click', () => { 
 		setPrimaryButton('redo');
-		redrawAndStats(); 
+		drawAndStats(); 
 	});
 
 	$('btn-clear').addEventListener('click', () => { 
 		setPrimaryButton('clear');
 		clearCanvas(); 
-		redrawAndStats(); 
+		drawAndStats(); 
 	});
 
 	$('hull').addEventListener('change', (e) => { 
 		state.showHull = e.target.checked; 
-		redrawAndStats();
+		drawAndStats();
 	});
 
 	$('pt-ids').addEventListener('change', (e) => { 
 		state.showLabels = e.target.checked; 
-		redrawAndStats();
+		drawAndStats();
 	});
 });
 
@@ -113,14 +113,14 @@ function setCanvasMode(mode) {
 }
 
 function setup() {
-	const container = document.getElementById('canvas-container');
+	const container = $('canvas-container');
 	canvas = createCanvas(container.clientWidth, container.clientHeight);
 	canvas.parent('canvas-container');
 	noLoop(); // draw on change
 }
 
 function windowResized() {
-	const container = document.getElementById('canvas-container');
+	const container = $('canvas-container');
 	resizeCanvas(container.clientWidth, container.clientHeight);
 	redraw();
 }
@@ -158,18 +158,19 @@ function draw() {
 }
 
 function mousePressed() {
-	const insideCanvas = mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height;
+	const insideCanvas = mouseX >= 0 && mouseX <= width 
+	&& mouseY >= 0 && mouseY <= height;
 	if (!insideCanvas) return;
 	if (state.mode === 'add') {
 		state.points.push(new geometry.Point(mouseX, mouseY));
-		redrawAndStats();
+		drawAndStats();
 	} else if (state.mode === 'drag') {
 		dragIndex = findNearestPoint(mouseX, mouseY);
 	} else if (state.mode === 'delete') {
 		const idx = findNearestPoint(mouseX, mouseY);
 		if (idx !== -1) {
 			state.points.splice(idx, 1);
-			redrawAndStats();
+			drawAndStats();
 		}
 	}
 }
@@ -178,29 +179,29 @@ function mouseDragged() {
 	if (state.mode === 'drag' && dragIndex !== -1) {
 		state.points[dragIndex].x = mouseX;
 		state.points[dragIndex].y = mouseY;
-		redrawAndStats();
+		drawAndStats();
 	}
 }
 
 function mouseReleased() {
 	if (state.mode === 'drag' && dragIndex !== -1) {
-		redrawAndStats();
+		drawAndStats();
 		dragIndex = -1;
 	}
 }
 
 function updateStats() {
-	document.getElementById('stat-n').textContent = state.points.length;
-	document.getElementById('stat-k').textContent = state.k;
+	$('stat-n').textContent = state.points.length;
+	$('stat-k').textContent = state.k;
 	if (state.points.length >= 3) {
 		state.hull = geometry.convexHullGrahamScan(state.points);
 	} else { state.hull = null; }
-	document.getElementById('stat-h').textContent = state.hull ? state.hull.length : 0;
+	$('stat-h').textContent = state.hull ? state.hull.length : 0;
 }
 
-function redrawAndStats() {
+function drawAndStats() {
 	updateStats();
-	redraw();
+	draw();
 }
 
 function findNearestPoint(x, y, r = 12) {

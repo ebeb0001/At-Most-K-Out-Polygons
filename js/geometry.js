@@ -70,9 +70,7 @@ export function sortPoints(points) {
 }
 
 export function convexHullGrahamScan(points) {
-	console.log('points:', points);
 	points = sortPoints(points);
-	// console.log('Sorted points:', points);
 	var hull = [];
 
 	for (const p of points) {
