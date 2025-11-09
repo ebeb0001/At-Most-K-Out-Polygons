@@ -164,7 +164,7 @@ function mousePressed() {
 	if (state.mode === 'add') {
 		state.points.push(new geometry.Point(mouseX, mouseY));
 		drawAndStats();
-	} else if (state.mode === 'drag') {
+	} else if (state.mode === 'drag' && dragIndex === -1) {
 		dragIndex = findNearestPoint(mouseX, mouseY);
 	} else if (state.mode === 'delete') {
 		const idx = findNearestPoint(mouseX, mouseY);
@@ -185,8 +185,9 @@ function mouseDragged() {
 
 function mouseReleased() {
 	if (state.mode === 'drag' && dragIndex !== -1) {
-		drawAndStats();
 		dragIndex = -1;
+		state.points = geometry.sortPoints(state.points);
+		drawAndStats();
 	}
 }
 
@@ -196,6 +197,9 @@ function updateStats() {
 	if (state.points.length >= 3) {
 		state.hull = geometry.convexHullGrahamScan(state.points);
 	} else { state.hull = null; }
+	if (state.showLabels && state.points.length > 0 && state.mode !== 'drag') {
+		state.points = geometry.sortPoints(state.points);
+	}
 	$('stat-h').textContent = state.hull ? state.hull.length : 0;
 }
 
