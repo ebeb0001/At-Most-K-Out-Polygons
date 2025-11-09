@@ -3,13 +3,16 @@ import * as geometry from './geometry.js';
 const state = {
 	k: 2,
 	points: [],
+	inside: [],
+	outside: [],
 	mode: 'add', // 'view' | 'add' | 'drag' | 'delete'
 	showHull: false,
 	showLabels: false,
+	showInOutPoints: false,
 	history: [],
 	future: [],
 	polygons : [],
-	hull : null
+	hull : []
 };
 
 let canvas;
@@ -30,7 +33,9 @@ function clearCanvas() {
 	state.points = [];
 	state.history = [];
 	state.future = [];
-	state.hull = null;
+	state.inside = [];
+	state.outside = [];
+	state.hull = [];
 	setCanvasMode('add');
 	drawAndStats();
 }
@@ -86,6 +91,11 @@ window.addEventListener('load', () => {
 		state.showLabels = e.target.checked; 
 		drawAndStats();
 	});
+
+	$('in-out-pts').addEventListener('change', (e) => {
+		state.showInOutPoints = e.target.checked;
+		drawAndStats();
+	});
 });
 
 function setPrimaryButton(button) {
@@ -122,7 +132,7 @@ function setup() {
 function windowResized() {
 	const container = $('canvas-container');
 	resizeCanvas(container.clientWidth, container.clientHeight);
-	redraw();
+	draw();
 }
 
 function draw() {
@@ -152,9 +162,19 @@ function draw() {
 			textSize(10);
 			text(idx, p.x + 6, p.y + 6);
 		}
+		
+		if (state.showInOutPoints) {
+			console.log(state.inside, state.outside);
+			if (state.inside.includes(p)) {
+				fill(0, 255, 0, 150);
+				circle(p.x, p.y, 8);
+			} else if (state.outside.includes(p)) {
+				fill(255, 0, 0, 100);
+				circle(p.x, p.y, 8);
+			}
+		}
 		idx++;
 	}
-
 }
 
 function mousePressed() {
@@ -194,18 +214,24 @@ function mouseReleased() {
 function updateStats() {
 	$('stat-n').textContent = state.points.length;
 	$('stat-k').textContent = state.k;
+
 	if (state.points.length >= 3) {
 		state.hull = geometry.convexHullGrahamScan(state.points);
+		state.inside = geometry.insidePoints(state.points, state.hull);
+		state.outside = geometry.outsidePoints(state.points, state.hull);
+		$('stat-in').textContent = state.inside ? state.inside.length : 0;
+		$('stat-out').textContent = state.outside ? state.outside.length : 0;
 	} else { state.hull = null; }
+	$('stat-h').textContent = state.hull ? state.hull.length : 0;
+
 	if (state.showLabels && state.points.length > 0 && state.mode !== 'drag') {
 		state.points = geometry.sortPoints(state.points);
 	}
-	$('stat-h').textContent = state.hull ? state.hull.length : 0;
 }
 
 function drawAndStats() {
 	updateStats();
-	draw();
+	redraw();
 }
 
 function findNearestPoint(x, y, r = 12) {

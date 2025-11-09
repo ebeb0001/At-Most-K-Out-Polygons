@@ -18,32 +18,6 @@ export function drawPolygon(points) {
 	endShape(CLOSE);
 }
 
-// export class Triangle {
-// 	constructor(a, b, c) {
-// 		this.a = a;
-// 		this.b = b;
-// 		this.c = c;
-// 	}
-
-// 	orientVerification(o1, o2) {
-// 		return (
-// 			(isLeftTurn(o1) && isLeftTurn(o2)) || 
-// 			(isRightTurn(o1) && isRightTurn(o2))
-// 		);
-// 	}
-
-// 	isInside(p) {
-// 		var orient_ab = orient(this.a, this.b, p);
-// 		var orient_bc = orient(this.b, this.c, p);
-// 		var orient_ac = orient(this.c, this.a, p);
-// 		return (
-// 			this.orientVerification(orient_ab, orient_bc) &&
-// 			this.orientVerification(orient_bc, orient_ac) &&
-// 			this.orientVerification(orient_ac, orient_ab)
-// 		);
-// 	}
-// }
-
 export function orient(A, B, C) {
 	const det = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
 	return det;
@@ -67,6 +41,48 @@ export function sortPoints(points) {
 		return dist(p0, p) - dist(p0, q);
 	});
 	return [p0, ...rest];
+}
+
+export function insidePoints(points, hull) {
+	const inside = [];
+	for (const p of points) {
+		let isInside = true;
+		if (!hull.includes(p)) {
+			for (let i = 0; i < hull.length; i++) {
+				const A = hull[i];
+				const B = hull[(i + 1) % hull.length];
+				if (isLeftTurn(orient(A, B, p))) {
+					isInside = false;
+					break;
+				}
+			}
+			if (isInside) {
+				inside.push(p);
+			}
+		}
+	}
+	return inside;
+}
+
+export function outsidePoints(points, hull) {
+	const outside = [];
+	for (const p of points) {
+		let isInside = true;
+		if (!hull.includes(p)) {
+			for (let i = 0; i < hull.length; i++) {
+				const A = hull[i];
+				const B = hull[(i + 1) % hull.length];
+				if (isLeftTurn(orient(A, B, p))) {
+					isInside = false;
+					break;
+				}
+			}
+			if (!isInside) {
+				outside.push(p);
+			}
+		}
+	}
+	return outside;
 }
 
 export function convexHullGrahamScan(points) {
