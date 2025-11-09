@@ -31,6 +31,22 @@ export function dist(p, q) {
 	return Math.sqrt((p.x - q.x) ** 2 + (p.y - q.y) ** 2);
 }
 
+export function cmp(p, q, points) {
+	id_p = points.indexOf(p);
+	id_q = points.indexOf(q);
+	return id_p < id_q;
+}
+
+export function succ(p, points) {
+	const idx = points.indexOf(p);
+	return points[(idx + 1) % points.length];
+}
+
+export function pred(p, points) {
+	const idx = points.indexOf(p);
+	return points[(idx - 1) % points.length];
+}
+
 export function sortPoints(points) {
 	points = points.slice().sort((p, q) => (p.y - q.y || p.x - q.x));
 	const p0 = points[0];
@@ -43,43 +59,39 @@ export function sortPoints(points) {
 	return [p0, ...rest];
 }
 
-export function insidePoints(points, hull) {
+export function insidePoints(points, polygon) {
 	const inside = [];
 	for (const p of points) {
 		let isInside = true;
-		if (!hull.includes(p)) {
-			for (let i = 0; i < hull.length; i++) {
-				const A = hull[i];
-				const B = hull[(i + 1) % hull.length];
+		if (!polygon.includes(p)) {
+			for (let i = 0; i < polygon.length; i++) {
+				const A = polygon[i];
+				const B = polygon[(i + 1) % polygon.length];
 				if (isLeftTurn(orient(A, B, p))) {
 					isInside = false;
 					break;
 				}
 			}
-			if (isInside) {
-				inside.push(p);
-			}
+			if (isInside) { inside.push(p); }
 		}
 	}
 	return inside;
 }
 
-export function outsidePoints(points, hull) {
+export function outsidePoints(points, polygon) {
 	const outside = [];
 	for (const p of points) {
 		let isInside = true;
-		if (!hull.includes(p)) {
-			for (let i = 0; i < hull.length; i++) {
-				const A = hull[i];
-				const B = hull[(i + 1) % hull.length];
+		if (!polygon.includes(p)) {
+			for (let i = 0; i < polygon.length; i++) {
+				const A = polygon[i];
+				const B = polygon[(i + 1) % polygon.length];
 				if (isLeftTurn(orient(A, B, p))) {
 					isInside = false;
 					break;
 				}
 			}
-			if (!isInside) {
-				outside.push(p);
-			}
+			if (!isInside) { outside.push(p); }
 		}
 	}
 	return outside;

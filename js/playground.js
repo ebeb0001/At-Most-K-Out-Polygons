@@ -164,13 +164,12 @@ function draw() {
 		}
 		
 		if (state.showInOutPoints) {
-			console.log(state.inside, state.outside);
 			if (state.inside.includes(p)) {
 				fill(0, 255, 0, 150);
-				circle(p.x, p.y, 8);
+				p.draw();
 			} else if (state.outside.includes(p)) {
-				fill(255, 0, 0, 100);
-				circle(p.x, p.y, 8);
+				fill(255, 0, 0, 150);
+				p.draw();
 			}
 		}
 		idx++;
@@ -219,10 +218,10 @@ function updateStats() {
 		state.hull = geometry.convexHullGrahamScan(state.points);
 		state.inside = geometry.insidePoints(state.points, state.hull);
 		state.outside = geometry.outsidePoints(state.points, state.hull);
-		$('stat-in').textContent = state.inside ? state.inside.length : 0;
-		$('stat-out').textContent = state.outside ? state.outside.length : 0;
-	} else { state.hull = null; }
-	$('stat-h').textContent = state.hull ? state.hull.length : 0;
+		$('stat-in').textContent = state.inside.length;
+		$('stat-out').textContent = state.outside.length;
+	} else { state.hull = []; }
+	$('stat-h').textContent = state.hull.length;
 
 	if (state.showLabels && state.points.length > 0 && state.mode !== 'drag') {
 		state.points = geometry.sortPoints(state.points);
