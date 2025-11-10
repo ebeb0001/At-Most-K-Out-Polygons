@@ -1,2 +1,39 @@
 import * as geometry from './geometry.js';
 
+export function enumerateAtMostKOutPolygons(points, k) {
+	let hull = geometry.convexHullGrahamScan(points);
+	return findChildren(points, hull, null, 0, [], k);
+}
+
+export function findChildren(points, polygon, p_j, embeddable_vertices, children, k) {
+	children.push(polygon);
+	console.log(polygon);
+	let q = null;
+	let outside_points = geometry.insideOutsidePoints(points, polygon, false);
+	if (p_j == null) { q = polygon[0]; }
+	else { q = geometry.pred(p_j, polygon); }
+	for (const p_i of polygon) {
+		// console.log("cmp", geometry.cmp(q, p_i, polygon));
+		if (geometry.cmp(q, p_i, polygon)) {
+			const inside_points = geometry.insideOutsidePoints(points, polygon);
+			// console.log(inside_points);
+			for (const p of inside_points) {
+				// console.log("isActive", 
+				// geometry.isActive(p_i, p, null, polygon, outside_points, points, k));
+				if (geometry.isActive(p_i, p, null, polygon, outside_points, points, k)) {
+					embeddable_vertices = geometry.embeddableVertices(polygon, outside_points);
+					findChildren(points, geometry.dig(p_i, p, polygon), embeddable_vertices.length, children);
+				}
+			}
+		}
+	}
+	for (const p_i of polygon) {
+		console.log("outside points enum", outside_points);
+		if (geometry.isActive(null, null, p_i, polygon, outside_points, points, k)) {
+			embeddable_vertices = geometry.embeddableVertices(polygon, outside_points);
+			findChildren(points, geometry.rmv(polygon, p_i, outside_points, points, k), 
+			embeddable_vertices.length, children);
+		}
+	}
+	return children;
+}

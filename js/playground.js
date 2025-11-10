@@ -13,7 +13,8 @@ const state = {
 	history: [],
 	future: [],
 	polygons : [],
-	hull : []
+	hull : [],
+	idx : -1
 };
 
 let canvas;
@@ -37,6 +38,8 @@ function clearCanvas() {
 	state.inside = [];
 	state.outside = [];
 	state.hull = [];
+	state.polygons = [];
+	state.idx = -1;
 	setCanvasMode('add');
 	drawAndStats();
 }
@@ -64,6 +67,10 @@ window.addEventListener('load', () => {
 
 	$('btn-k-out').addEventListener('click', () => {
 		setPrimaryButton('k-out');
+		if (state.polygons.length === 0 && state.hull) {
+			state.polygons = enumarator.enumerateAtMostKOutPolygons(state.points, state.k);
+			state.idx = 0;
+		} else { state.idx = (state.idx + 1) % state.polygons.length; }
 		drawAndStats();
 	});
 
@@ -117,10 +124,10 @@ function setCanvasMode(mode) {
 		elem.classList.remove('active');
 	}
 
-	if (mode === 'view') $('mode-view').classList.add('active');
-	else if (mode === 'add') $('mode-edit').classList.add('active');
-	else if (mode === 'drag') $('mode-drag').classList.add('active');  
-	else if (mode === 'delete') $('mode-delete').classList.add('active');
+	if (mode === 'view') { $('mode-view').classList.add('active'); }
+	else if (mode === 'add') { $('mode-edit').classList.add('active'); }
+	else if (mode === 'drag') { $('mode-drag').classList.add('active'); }  
+	else if (mode === 'delete') { $('mode-delete').classList.add('active'); }
 }
 
 function setup() {
@@ -175,12 +182,26 @@ function draw() {
 		}
 		idx++;
 	}
+
+	if (state.idx >= 0) {
+		stroke(125, 50,240);
+		strokeWeight(2);
+		noFill();
+		geometry.drawPolygon(state.polygons[state.idx]);
+	}
+
+	strokeWeight(1);
+	noStroke();
 }
 
 function mousePressed() {
 	const insideCanvas = mouseX >= 0 && mouseX <= width 
 	&& mouseY >= 0 && mouseY <= height;
 	if (!insideCanvas) return;
+	if (state.mode !== 'view') {
+		state.polygons = [];
+		state.idx = -1;
+	}
 	if (state.mode === 'add') {
 		state.points.push(new geometry.Point(mouseX, mouseY));
 		drawAndStats();
@@ -196,6 +217,10 @@ function mousePressed() {
 }
 
 function mouseDragged() {
+	if (state.mode !== 'view') {
+		state.polygons = [];
+		state.idx = -1;
+	}
 	if (state.mode === 'drag' && dragIndex !== -1) {
 		state.points[dragIndex].x = mouseX;
 		state.points[dragIndex].y = mouseY;
