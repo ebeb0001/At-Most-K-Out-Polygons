@@ -1,4 +1,5 @@
 import * as geometry from './geometry.js';
+import * as enumarator from './enumerator.js';
 
 const state = {
 	k: 2,
@@ -216,15 +217,22 @@ function updateStats() {
 
 	if (state.points.length >= 3) {
 		state.hull = geometry.convexHullGrahamScan(state.points);
-		state.inside = geometry.insidePoints(state.points, state.hull);
-		state.outside = geometry.outsidePoints(state.points, state.hull);
-		$('stat-in').textContent = state.inside.length;
-		$('stat-out').textContent = state.outside.length;
-	} else { state.hull = []; }
+		state.inside = geometry.insideOutsidePoints(state.points, state.hull);
+		state.outside = geometry.insideOutsidePoints(state.points, state.hull, false);
+	} else { 
+		state.hull = []; 
+		state.inside = [];
+		state.outside = [];
+	}
 	$('stat-h').textContent = state.hull.length;
+	$('stat-in').textContent = state.inside.length;
+	$('stat-out').textContent = state.outside.length;
 
 	if (state.showLabels && state.points.length > 0 && state.mode !== 'drag') {
-		state.points = geometry.sortPoints(state.points);
+		if (state.hull.length === 0) return;
+		state.hull = geometry.sortPoints(state.hull);
+		const rest = state.points.filter((p) => !state.hull.includes(p));
+		state.points = state.hull.concat(rest);
 	}
 }
 
