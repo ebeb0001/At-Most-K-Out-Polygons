@@ -79,81 +79,122 @@ export function convexHullGrahamScan(points) {
 
 // function from paper
 
-export function cmp(p_i, q_j, points) {
+export function cmp(p_i, p_j, points) {
+// 	We denote by pi ≺ pj if i < j holds, and we say that pj is larger than pi on P
+
 	const i = points.indexOf(p_i);
-	const j = points.indexOf(q_j);
+	const j = points.indexOf(p_j);
 	return i < j;
 }
 
-export function succ(p, points) {
-	const idx = points.indexOf(p);
+export function succ(p_i, points) {
+// succ(pi) denote the successor of pi of P. Note that the successor of pt is p1
+
+	const idx = points.indexOf(p_i);
 	return points[(idx + 1) % points.length];
 }
 
-export function pred(p, points) {
-	const idx = points.indexOf(p);
+export function pred(p_i, points) {
+// pred(pi)  denote the predecessor of pi of P
+
+	const idx = points.indexOf(p_i);
 	return points[(idx - 1 + points.length) % points.length];
 }
 
 export function isEmbeddable(p_i, polygon, outsidePoints) {
+// A vertex pi of P is embeddable if the triangle consisting of pred(pi), pi, 
+// and succ(pi) does not intersect the interior of P and includes no point in out(P).
+	
+	console.log("checking embeddability of point ", p_i);
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { return false; }
+	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+		console.log("not embeddable");
+		return false; 
+	}
 
-	// console.log(outsidePoints);
 	for (const q of outsidePoints) {
 		const orient1 = orient(pred_p_i, succ_p_i, q);
 		const orient2 = orient(succ_p_i, p_i, q);
 		const orient3 = orient(p_i, pred_p_i, q);
 		if (isLeftTurn(orient1) && isLeftTurn(orient2) && isLeftTurn(orient3)) {
+			console.log("not embeddable");
 			return false;
 		}
 	}
+	console.log("embeddable");
 	return true;
 }
 
 export function embedPoint(polygon, p_i) {
-	return polygon.filter((p) => p !== p_i);
+// An embedment of an embeddable vertex pi of P is to remove two edges (pred(pi), pi) and (pi,succ(pi)) 
+// and insert the edge (pred(pi),succ(pi)). We denote by emb(P, pi) the simple polygon obtained from P 
+// by applying the embedment of pi to P
+
+	return sortPoints(polygon.filter((p) => p !== p_i));
 }
 
 export function isInsertable(p, idx, polygon, outsidePoints) {
+// A point p ∈ out(P) is insertable to an edge (pi,succ(pi)) of P 
+// if the triangle consisting of p, pi, and succ(pi) does not intersect the interior of P 
+// and includes no point in out(P). 
+
+	console.log("checking embeddability of point ", p);
 	const p_i = polygon[idx];
 	const succ_p_i = succ(p_i, polygon);
-	console.log(p, p_i, succ_p_i);
-	if (isLeftTurn(orient(p, p_i, succ_p_i))) { return false; }
+	if (isLeftTurn(orient(p, p_i, succ_p_i))) { 
+		console.log("not embeddable");
+		return false; 
+	}
 
-	for (const q of outsidePoints) {
+	const rest = outsidePoints.filter((p_i) => p_i !== p);
+	for (const q of rest) {
 		const orient1 = orient(p_i, p, q);
 		const orient2 = orient(p, succ_p_i, q);
 		const orient3 = orient(succ_p_i, p_i, q);
 		if (isLeftTurn(orient1) && isLeftTurn(orient2) && isLeftTurn(orient3)) {
+			console.log("not embeddable");
 			return false;
 		}
 	}
+	console.log("embeddable");
 	return true;
 }
 
 export function insertPoint(polygon, p, idx) {
-	// console.log(polygon);
+// For a point p ∈ out(P) insertable to an edge (pi,succ(pi)) of P, the insertion of p 
+// to (pi,succ(pi)) is to remove (pi,succ(pi)) and insert the two edges (pi, p) and (p,succ(pi)). 
+// We denote by ins(P,(pi,succ(pi)), p) the simple polygon obtained from P 
+// by applying the insertion of p to (pi,succ(pi)) on P.
+
 	const new_polygon = polygon.toSpliced(idx + 1, 0, p);
-	// console.log(new_polygon);
-	return new_polygon;
+	return sortPoints(new_polygon);
 }
 
 export function dist(p_i, p, polygon) {
+// we define the distance of (pi ,succ(pi)) from p as the Euclidean distance between 
+// the midpoint of (pi ,succ(pi)) and p. The distance from p to (pi ,succ(pi)) is denoted 
+// by dist((pi ,succ(pi)), p). Note that, if p is not insertable to an edge (pi ,succ(pi)), 
+// the distance from p to (pi ,succ(pi)) is not defined
+
 	const succ_p_i = succ(p_i, polygon);
 	const middle_point = new Point(p_i.x + ((succ_p_i.x - p_i.x) / 2), p_i.y + ((succ_p_i.y - p_i.y) / 2));
 	return euclidianDist(middle_point, p);
 }
 
-export function cloe(p, polygon, outsidePoints) { 
+export function cloe(p, polygon, outsidePoints) {
+// We denote the closest edge of P among the edges insertable from p by
+// cloe(P, p). If ties exist, the largest edge is cloe(P, p).
+
+	console.log("searching for the closest edge to point ", p);
+	// polygon = sortPoints(polygon);
 	let min_dist = Infinity;
 	let min_q = null;
 	for (let i = 0; i < polygon.length; i++) {
-		console.log(p, i, polygon, outsidePoints);
 		if (isInsertable(p, i, polygon, outsidePoints)) {
 			const q = polygon[i];
 			const distance = dist(q, p, polygon);
+			console.log(distance);
 			if (distance < min_dist) { 
 				min_dist = distance;
 				min_q = q;
@@ -167,10 +208,14 @@ export function cloe(p, polygon, outsidePoints) {
 			}
 		}
 	}
+	console.log("min_q", min_q);
 	return min_q;
 }
 
 export function insertablePoints(polygon, outsidePoints) {
+// We denote the set of the points insertable to at least one edge of P by iout(P) ⊆ out(P).
+
+	console.log("computing the insertable points");
 	let insertable_points = [];
 	for (const p of outsidePoints) {
 		let i = 0;
@@ -179,13 +224,19 @@ export function insertablePoints(polygon, outsidePoints) {
 			if (isInsertable(p, i, polygon, outsidePoints)) {
 				is_insertable = true;
 			}
+			i++;
 		}
 		if (is_insertable) { insertable_points.push(p); }
 	}
+	console.log("insertable points ", insertable_points);
 	return insertable_points;
 }
 
 export function clop(polygon, outsidePoints) {	
+// A point p ∈ iout(P) is the closest outside point, denoted by clop(P), of P if
+// dist(cloe(P, p), p) = min q∈iout(P) {dist(cloe(P, q), q)}
+
+	console.log("searching the closest outside point");
 	let min_dist = Infinity;
 	let min_p = null;
 	for (const p of outsidePoints) {
@@ -193,96 +244,175 @@ export function clop(polygon, outsidePoints) {
 		const distance = dist(q, p, polygon);
 		if (distance < min_dist) { min_p = p; }
 	}
+	console.log("min_p", min_p);
 	return min_p;
 }
 
 export function larg(polygon, outsidePoints) {
-	console.log("outside points lag", outsidePoints);
+// We denote by larg(P) the largest embeddable vertex of P. For convenience, we define
+// larg(P) := ∅ if P has no embeddable vertex.
+
+	console.log("seaching for the largest embeddable vertex of polygon ", polygon);
 	let largest_p = null;
-	polygon = sortPoints(polygon);
+	// polygon = sortPoints(polygon);
 	for (const p of polygon) {
 		if (isEmbeddable(p, polygon, outsidePoints)) {
 			largest_p = p;
 		}
 	}
+	console.log("largest p", largest_p);
 	return largest_p;
 }
 
-export function par(polygon, outsidePoints) {
-	console.log("outside points par", outsidePoints);
-	const p = larg(polygon, outsidePoints);
-	if (p == null) { 
-		const closest_outside_point = clop(polygon, outsidePoints);
-		const closest_edge = cloe(closest_outside_point, polygon, outsidePoints);
-		return insertPoint(polygon, closest_outside_point, polygon.indexOf(closest_edge));
-	} else { return embedPoint(polygon, p); }
+export function par(polygon, outsidePoints, points) {
+// we define the parent of P as follows:
+// par(P) :=
+// emb(P, larg(P)) if P has an embeddable vertex,
+// ins(P, cloe(P, clop(P)), clop(P)) otherwise.
+
+// polygon = sortPoints(polygon);
+	if (polygon != null) {
+		console.log("computing the parent of polygon ", polygon);
+		outsidePoints = insideOutsidePoints(points, polygon, false);
+		const p = larg(polygon, outsidePoints);
+		let parent = null;
+		if (p == null) { 
+			const closest_outside_point = clop(polygon, outsidePoints);
+			const closest_edge = cloe(closest_outside_point, polygon, outsidePoints);
+			parent = insertPoint(polygon, closest_outside_point, polygon.indexOf(closest_edge));
+		} else { parent = embedPoint(polygon, p); }
+		console.log("parent", parent);
+		return sortPoints(parent);
+	}
 }
 
 export function isDigable(p_i, p, polygon, points) {
-	const succ_p_i = succ(p_i, polygon);
-	if (isLeftTurn(orient(p_i, p, succ_p_i))) { return false; }
+// A pair (pi, p) of a vertex pi of P and a point p ∈ in(P) is digable 
+// if the triangle consisting of pi, p, and succ(pi) lies inside P and 
+// does not contain any point of S.
 
-	for (const point of points) {
+	const succ_p_i = succ(p_i, polygon);
+	console.log("checking the digability of points", p_i, p);
+	if (isLeftTurn(orient(p_i, p, succ_p_i))) { 
+		console.log("not digable");
+		return false; 
+	}
+
+	const rest = points.filter((q) => q !== p_i);
+	for (const point of rest) {
 		const orient1 = orient(p_i, succ_p_i, point);
 		const orient2 = orient(succ_p_i, p, point);
 		const orient3 = orient(p, p_i, point);
 		if (isRightTurn(orient1) && isRightTurn(orient2) && isRightTurn(orient3)) {
+			console.log("not digable");
 			return false;
 		}
 	}
+	console.log("digable");
 	return true;
 }
 
-export function dig(p_i, p, polygon) {
-	return insertPoint(polygon, p, polygon.indexOf(p_i));
+export function dig(p_i, p, polygon, points) {
+// A dig operation to a digable pair (pi, p) removes the edge (pi ,succ(pi)) 
+// and inserts the two edges (pi, p) and (p,succ(pi)). 
+// dig(P, pi, p) denotes the resulting polygon.
+
+	// console.log("point set", points);
+	if (isDigable(p_i, p, polygon, points)) {
+		console.log("dig operation for point", p_i);
+		return insertPoint(polygon, p, polygon.indexOf(p_i));
+	}
+	// return polygon;
 }
 
 export function isRemovable(p_i, polygon, outsidePoints, points, k) {
-	console.log("outside points is removable", outsidePoints);
-	if (outsidePoints != null && outsidePoints.length >= k) { return false; }
+// A vertex pi of P is removable if (1) |out(P)| < k holds, (2) the triangle consisting of pred(pi), pi, 
+// and succ(pi) lies inside P, and (3) the triangle does not contain any point of S.
+
+	console.log("checking the removability of point", p_i);
+	if (outsidePoints != null && outsidePoints.length >= k) { 
+		console.log("not removable");
+		return false; 
+	}
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { return false; }
+	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+		console.log("not removable");
+		return false; 
+	}
 
-	for (const point of points) {
+	const rest = points.filter((q) => q !== p_i);
+	for (const point of rest) {
 		const orient1 = orient(pred_p_i, succ_p_i, point);
 		const orient2 = orient(succ_p_i, p_i, point);
 		const orient3 = orient(p_i, pred_p_i, point);
 		if (isRightTurn(orient1) && isRightTurn(orient2) && isRightTurn(orient3)) {
+			console.log("not removable");
 			return false;
 		}
 	}
+	console.log("removable");
 	return true;
 }
 
 export function rmv(polygon, p_i, outsidePoints, points, k) {
-	// console.log(points);
+// A remove operation to a removable vertex pi removes the two edges (pred(pi), pi) 
+// and (pi ,succ(pi)), and inserts an edge (pred(pi),succ(pi)) to P. 
+// rmv(P, pi) denotes the resulting polygon.
+
 	if (isRemovable(p_i, polygon, outsidePoints, points, k)) {
+		console.log("remove operation for point", p_i);
 		return embedPoint(polygon, p_i);
 	}
+	// return polygon;	
 }
 
 export function isActive(p_i, p, p_j, polygon, outsidePoints, points, k) {
-	// console.log(p_i);
-	// console.log(p);
-	// console.log(p_j);
-	// console.log(polygon);
-	console.log("outside point is active", outsidePoints);
-	// console.log(points);
-	// console.log(k);
+// We say that a digable pair (pi , p) and a removable vertex pj are active 
+// if dig(P, pi , p) and rmv(P, pj ) are children of P, respectively. 
+
+	let activity = true;
 	if (p_i == null && p == null) { 
-		return par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints) === polygon; 
+		console.log("checking the activity of point", p_j);
+		const parent = par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints, points);
+		if (parent == null) { activity = false; }
+		if (parent.length === polygon.length) {
+			for (let i = 0; i < parent.length; i++) {
+				if (parent[i] !== polygon[i]) {
+					activity = false;
+					break;
+				}
+			}
+		} else { activity = false; }
+		// const activity = par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints, points) === polygon;
+		activity ? console.log("active") : console.log("not active");
+		return activity; 
+	} else if (p_j == null) { 
+		console.log("checking the activity of pair", p_i, p);
+		const parent = par(dig(p_i, p, polygon, points), outsidePoints, points); 
+		if (parent == null) { activity = false; }
+		if (parent.length === polygon.length) {
+			for (let i = 0; i < parent.length; i++) {
+				if (parent[i] !== polygon[i]) {
+					activity = false;
+					break;
+				}
+			}
+		} else { activity = false; }
+		activity ? console.log("active") : console.log("not active");
+		return activity;
 	}
-	if (p_j == null) { return par(dig(p_i, p, polygon), outsidePoints) === polygon; }
 }
 
 export function embeddableVertices(polygon, outsidePoints) {
+	console.log("computing the embeddable vertices of polygon", polygon);
 	let embeddable_points = [];
 	for (const p of polygon) {
 		if (isEmbeddable(p, polygon, outsidePoints)) {
 			embeddable_points.push(p);
 		}
 	}
+	console.log("embeddable verticies", embeddable_points);
 	return embeddable_points;
 }
 
