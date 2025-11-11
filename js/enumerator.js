@@ -18,7 +18,7 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 			for (const p of inside_points) {
 				if (geometry.isActive(p_i, p, null, polygon, outside_points, points, k)) {
 					embeddable_vertices = geometry.embeddableVertices(polygon, outside_points);
-					findChildren(points, geometry.dig(p_i, p, polygon), p_i, embeddable_vertices.length, children);
+					findChildren(points, geometry.dig(p_i, p, polygon, points), p_i, embeddable_vertices.length, children);
 				}
 			}
 		}
