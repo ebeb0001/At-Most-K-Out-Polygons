@@ -1,22 +1,20 @@
 // classes
 
 export class Point {
-	constructor(x, y, radius = 8) {
+	constructor(x, y) {
 		this.x = x;
 		this.y = y;
-		this.radius = radius;
 	}
 
 	draw() {
-		circle(this.x, this.y, this.radius);
+		circle(this.x, this.y, 8);
 	}
 }
 
 // base functions 
 
 export function orient(A, B, C) {
-	const det = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
-	return det;
+	return -((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x));
 }
 
 export function isLeftTurn(orient_det) { return orient_det > 0; }
@@ -39,7 +37,7 @@ export function sortPoints(points) {
 		if (isLeftTurn(orient_p)) { return -1; }
 		if (isRightTurn(orient_p)) { return 1; }
 		return euclidianDist(p0, p) - euclidianDist(p0, q);
-	}).toReversed();
+	});
 	return [p0, ...rest];
 }
 
@@ -81,7 +79,7 @@ export function convexHullGrahamScan(points) {
 
 	for (const p of points) {
 		while (hull.length >= 2 &&
-		isLeftTurn(orient(hull[hull.length - 2], hull[hull.length - 1], p))) {
+		isRightTurn(orient(hull[hull.length - 2], hull[hull.length - 1], p))) {
 			hull.pop();
 		}
 		hull.push(p);
@@ -125,7 +123,7 @@ export function segmentHitsPolygon(u, v, polygon) {
 }
 
 export function isPolygon(polygon, P) {
-	console.log("chekiing if the two polygons are the same", polygon, P);
+	console.log("checking if the two polygons are the same", polygon, P);
 	for (const point of polygon) {
 		if (!P.includes(point)) { 
 			console.log("not the same", point);
@@ -167,6 +165,10 @@ export function isEmbeddable(p_i, polygon, outsidePoints) {
 	console.log("checking embeddability of point ", p_i);
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
+	// console.log(pred_p_i);
+	// console.log(p_i);
+	// console.log(succ_p_i);
+	// console.log(orient(pred_p_i, p_i, succ_p_i));
 	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not embeddable 1");
 		return false; 
@@ -237,7 +239,6 @@ export function insertPoint(polygon, p, idx) {
 // by applying the insertion of p to (pi,succ(pi)) on P.
 
 	const new_polygon = polygon.toSpliced(idx + 1, 0, p);
-	// return sortPoints(new_polygon);
 	return new_polygon;
 }
 
@@ -345,7 +346,6 @@ export function par(polygon, outsidePoints, points) {
 // emb(P, larg(P)) if P has an embeddable vertex,
 // ins(P, cloe(P, clop(P)), clop(P)) otherwise.
 
-// polygon = sortPoints(polygon);
 	if (polygon != null) {
 		console.log("computing the parent of polygon ", polygon);
 		outsidePoints = insideOutsidePoints(points, polygon, false);
@@ -369,7 +369,7 @@ export function isDigable(p_i, p, polygon, points) {
 
 	const succ_p_i = succ(p_i, polygon);
 	console.log("checking the digability of pair", p_i, p);
-	if (isLeftTurn(orient(p_i, succ_p_i, p))) {
+	if (isLeftTurn(orient(p_i, p, succ_p_i))) {
 		console.log("not digable 1");
 		return false; 
 	}
@@ -468,6 +468,7 @@ export function isActive(p_i, p, p_j, polygon, outsidePoints, points, k) {
 	if (parent == null || parent.length !== polygon.length) { activity = false; }
 	else { activity = isPolygon(parent, polygon); } 
 	activity ? console.log("active") : console.log("not active");
+	return activity;
 }
 
 export function embeddableVertices(polygon, outsidePoints) {
