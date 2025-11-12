@@ -63,7 +63,7 @@ window.addEventListener('load', () => {
 	$('mode-delete').addEventListener('click', () => setCanvasMode('delete'));
 
 	$('btn-random').addEventListener('click', () => { 
-		state.points = setRandomPreset(Math.floor(Math.random() * 41));
+		state.points = setRandomPreset(Math.floor(Math.random() * 16));
 		setPrimaryButton('rand');
 		drawAndStats(); 
 	});
