@@ -29,7 +29,7 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 		if (geometry.isActive(null, null, p_i, polygon, outside_points, points, k)) {
 			embeddable_vertices = geometry.embeddableVertices(polygon, outside_points);
 			findChildren(points, geometry.rmv(polygon, p_i, outside_points, points, k), 
-			null, embeddable_vertices.length, children);
+			null, embeddable_vertices.length, children, k);
 		}
 	}
 	console.log("end");

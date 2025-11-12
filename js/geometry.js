@@ -128,9 +128,12 @@ export function isPolygon(polygon, P) {
 		console.log("not the same");
 		return false; 
 	}
-	for (const point of polygon) {
-		if (!P.includes(point)) { 
-			console.log("not the same", point);
+	polygon = sortPoints(polygon);
+	P = sortPoints(P);
+
+	for (let i = 0; i < P.length; i++) {
+		if (polygon[i] !== P[i]) { 
+			console.log("not the same", polygon[i]);
 			return false; 
 		}
 	}
@@ -169,7 +172,8 @@ export function isEmbeddable(p_i, polygon, outsidePoints) {
 	console.log("checking embeddability of point ", p_i);
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i)) 
+	&& !isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not embeddable 1");
 		return false; 
 	}
@@ -206,7 +210,8 @@ export function isInsertable(p, idx, polygon, outsidePoints) {
 	console.log("checking insertability of point ", p);
 	const p_i = polygon[idx];
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(p_i, p, succ_p_i))) { 
+	if (isRightTurn(orient(p_i, p, succ_p_i)) 
+	&& !isLeftTurn(orient(p_i, p, succ_p_i))) { 
 		console.log("not insertable 1");
 		return false; 
 	}
@@ -267,7 +272,8 @@ export function cloe(p, polygon, outsidePoints) {
 			const q = polygon[i];
 			const distance = dist(q, p, polygon);
 			const size_edge = euclidianDist(q, succ(q, polygon));
-			if (distance < min_dist || (distance === min_dist && size_edge > size_edge_min)) {
+			if (min_q == null || distance < min_dist 
+			|| (distance === min_dist && size_edge > size_edge_min)) {
 				console.log("found a new closest edge");
 				min_dist = distance;
 				min_q = q;
@@ -311,7 +317,7 @@ export function clop(polygon, outsidePoints) {
 		const q = cloe(p, polygon, outsidePoints);
 		if (q != null) {
 			const distance = dist(q, p, polygon);
-			if ((distance < min_dist) 
+			if ( min_p == null || (distance < min_dist) 
 			|| (distance === min_dist && (p.x > min_p.x || (p.x === min_p.x && p.y > min_p.y)))) {
 				console.log("found a new closest outside point");
 				min_p = p; 
@@ -340,7 +346,7 @@ export function larg(polygon, outsidePoints) {
 	return largest_p;
 }
 
-export function par(polygon, outsidePoints, points) {
+export function par(polygon, points) {
 // we define the parent of P as follows:
 // par(P) :=
 // emb(P, larg(P)) if P has an embeddable vertex,
@@ -348,7 +354,7 @@ export function par(polygon, outsidePoints, points) {
 
 	if (polygon != null) {
 		console.log("computing the parent of polygon ", polygon);
-		outsidePoints = insideOutsidePoints(points, polygon, false);
+		const outsidePoints = insideOutsidePoints(points, polygon, false);
 		const p = larg(polygon, outsidePoints);
 		let parent = null;
 		if (p == null) { 
@@ -368,7 +374,8 @@ export function isDigable(p_i, p, polygon, points) {
 
 	const succ_p_i = succ(p_i, polygon);
 	console.log("checking the digability of pair", p_i, p);
-	if (isLeftTurn(orient(p_i, p, succ_p_i))) {
+	if (isLeftTurn(orient(p_i, p, succ_p_i)) 
+	&& !isRightTurn(orient(p_i, p, succ_p_i))) {
 		console.log("not digable 1");
 		return false; 
 	}
@@ -418,7 +425,8 @@ export function isRemovable(p_i, polygon, outsidePoints, points, k) {
 	}
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i)) && 
+	!isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not removable 2");
 		return false; 
 	}
@@ -459,10 +467,10 @@ export function isActive(p_i, p, p_j, polygon, outsidePoints, points, k) {
 	let parent = null;
 	if (p_i == null && p == null) { 
 		console.log("checking the activity of point", p_j);
-		parent = par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints, points);
+		parent = par(rmv(polygon, p_j, outsidePoints, points, k), points);
 	} else if (p_j == null) { 
 		console.log("checking the activity of pair", p_i, p);
-		parent = par(dig(p_i, p, polygon, points), outsidePoints, points); 
+		parent = par(dig(p_i, p, polygon, points), points); 
 	}
 	if (parent == null || parent.length !== polygon.length) { activity = false; }
 	else { activity = isPolygon(parent, polygon); } 
