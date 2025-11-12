@@ -13,15 +13,15 @@ export class Point {
 
 // base functions 
 
-export function orient(A, B, C) {
+function orient(A, B, C) {
 	return -((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x));
 }
 
-export function isLeftTurn(orient_det) { return orient_det > 0; }
+function isLeftTurn(orient_det) { return orient_det > 0; }
 
-export function isRightTurn(orient_det) { return orient_det < 0; }
+function isRightTurn(orient_det) { return orient_det < 0; }
 
-export function euclidianDist(p, q) {
+function euclidianDist(p, q) {
 	return Math.sqrt((p.x - q.x) ** 2 + (p.y - q.y) ** 2);
 }
 
@@ -41,7 +41,7 @@ export function sortPoints(points) {
 	return [p0, ...rest];
 }
 
-export function isInsidePolygon(p, polygon) {
+function isInsidePolygon(p, polygon) {
 	const line = p.y;
 	let nb_intersection = 0;
 	let intersections = [];
@@ -87,7 +87,7 @@ export function convexHullGrahamScan(points) {
 	return hull;
 }
 
-export function pointInTriangle(a, b, c, p) {
+function pointInTriangle(a, b, c, p) {
 	const orient1 = orient(a, b, p); 
 	const orient2 = orient(b, c, p);
 	const orient3 = orient(c, a, p);
@@ -98,7 +98,7 @@ export function pointInTriangle(a, b, c, p) {
 	return false;
 }
 
-export function segmentIntersect(a, b, u, v) {
+function segmentIntersect(a, b, u, v) {
 	const orient1 = orient(u, v, a); 
 	const orient2 = orient(u, v, b);
 	if ((isLeftTurn(orient1) && isRightTurn(orient2)) 
@@ -111,7 +111,7 @@ export function segmentIntersect(a, b, u, v) {
 	return false;
 }
 
-export function segmentHitsPolygon(u, v, polygon) {
+function segmentHitsPolygon(u, v, polygon) {
 	for (let i = 0; i < polygon.length; i++) {
 		const p = polygon[i];
 		const succ_p = succ(p, polygon);
@@ -122,7 +122,7 @@ export function segmentHitsPolygon(u, v, polygon) {
 	return false;
 }
 
-export function isPolygon(polygon, P) {
+function isSamePolygon(polygon, P) {
 	console.log("checking if the two polygons are the same", polygon, P);
 	if (polygon.length !== P.length) {
 		console.log("not the same");
@@ -151,7 +151,7 @@ export function cmp(p_i, p_j, points) {
 	return i < j;
 }
 
-export function succ(p_i, points) {
+function succ(p_i, points) {
 // succ(pi) denote the successor of pi of P. Note that the successor of pt is p1
 
 	const idx = points.indexOf(p_i);
@@ -165,7 +165,7 @@ export function pred(p_i, points) {
 	return points[(idx - 1 + points.length) % points.length];
 }
 
-export function isEmbeddable(p_i, polygon, outsidePoints) {
+function isEmbeddable(p_i, polygon, outsidePoints) {
 // A vertex pi of P is embeddable if the triangle consisting of pred(pi), pi, 
 // and succ(pi) does not intersect the interior of P and includes no point in out(P).
 	
@@ -193,7 +193,7 @@ export function isEmbeddable(p_i, polygon, outsidePoints) {
 	return true;
 }
 
-export function embedPoint(polygon, p_i) {
+function embedPoint(polygon, p_i) {
 // An embedment of an embeddable vertex pi of P is to remove two edges (pred(pi), pi) and (pi,succ(pi)) 
 // and insert the edge (pred(pi),succ(pi)). We denote by emb(P, pi) the simple polygon obtained from P 
 // by applying the embedment of pi to P
@@ -202,7 +202,7 @@ export function embedPoint(polygon, p_i) {
 	return polygon.filter((p) => p !== p_i);
 }
 
-export function isInsertable(p, idx, polygon, outsidePoints) {
+function isInsertable(p, idx, polygon, outsidePoints) {
 // A point p ∈ out(P) is insertable to an edge (pi,succ(pi)) of P 
 // if the triangle consisting of p, pi, and succ(pi) does not intersect the interior of P 
 // and includes no point in out(P). 
@@ -237,7 +237,7 @@ export function isInsertable(p, idx, polygon, outsidePoints) {
 	return true;
 }
 
-export function insertPoint(polygon, p, idx) {
+function insertPoint(polygon, p, idx) {
 // For a point p ∈ out(P) insertable to an edge (pi,succ(pi)) of P, the insertion of p 
 // to (pi,succ(pi)) is to remove (pi,succ(pi)) and insert the two edges (pi, p) and (p,succ(pi)). 
 // We denote by ins(P,(pi,succ(pi)), p) the simple polygon obtained from P 
@@ -247,7 +247,7 @@ export function insertPoint(polygon, p, idx) {
 	return new_polygon;
 }
 
-export function dist(p_i, p, polygon) {
+function dist(p_i, p, polygon) {
 // we define the distance of (pi ,succ(pi)) from p as the Euclidean distance between 
 // the midpoint of (pi ,succ(pi)) and p. The distance from p to (pi ,succ(pi)) is denoted 
 // by dist((pi ,succ(pi)), p). Note that, if p is not insertable to an edge (pi ,succ(pi)), 
@@ -258,7 +258,7 @@ export function dist(p_i, p, polygon) {
 	return euclidianDist(middle_point, p);
 }
 
-export function cloe(p, polygon, outsidePoints) {	
+function cloe(p, polygon, outsidePoints) {	
 // We denote the closest edge of P among the edges insertable from p by
 // cloe(P, p). If ties exist, the largest edge is cloe(P, p).
 
@@ -285,7 +285,7 @@ export function cloe(p, polygon, outsidePoints) {
 	return min_q;
 }
 
-export function insertablePoints(polygon, outsidePoints) {
+function insertablePoints(polygon, outsidePoints) {
 // We denote the set of the points insertable to at least one edge of P by iout(P) ⊆ out(P).
 
 	console.log("computing the insertable points");
@@ -305,7 +305,7 @@ export function insertablePoints(polygon, outsidePoints) {
 	return insertable_points;
 }
 
-export function clop(polygon, outsidePoints) {	
+function clop(polygon, outsidePoints) {	
 // A point p ∈ iout(P) is the closest outside point, denoted by clop(P), of P if
 // dist(cloe(P, p), p) = min q∈iout(P) {dist(cloe(P, q), q)}
 
@@ -329,7 +329,7 @@ export function clop(polygon, outsidePoints) {
 	return min_p;
 }
 
-export function larg(polygon, outsidePoints) {
+function larg(polygon, outsidePoints) {
 // We denote by larg(P) the largest embeddable vertex of P. For convenience, we define
 // larg(P) := ∅ if P has no embeddable vertex.
 
@@ -346,7 +346,7 @@ export function larg(polygon, outsidePoints) {
 	return largest_p;
 }
 
-export function par(polygon, points) {
+function par(polygon, points) {
 // we define the parent of P as follows:
 // par(P) :=
 // emb(P, larg(P)) if P has an embeddable vertex,
@@ -367,7 +367,7 @@ export function par(polygon, points) {
 	}
 }
 
-export function isDigable(p_i, p, polygon, points) {
+function isDigable(p_i, p, polygon, points) {
 // A pair (pi, p) of a vertex pi of P and a point p ∈ in(P) is digable 
 // if the triangle consisting of pi, p, and succ(pi) lies inside P and 
 // does not contain any point of S.
@@ -414,7 +414,7 @@ export function dig(p_i, p, polygon, points) {
 	// return polygon;
 }
 
-export function isRemovable(p_i, polygon, outsidePoints, points, k) {
+function isRemovable(p_i, polygon, outsidePoints, points, k) {
 // A vertex pi of P is removable if (1) |out(P)| < k holds, (2) the triangle consisting of pred(pi), pi, 
 // and succ(pi) lies inside P, and (3) the triangle does not contain any point of S.
 
@@ -473,7 +473,7 @@ export function isActive(p_i, p, p_j, polygon, outsidePoints, points, k) {
 		parent = par(dig(p_i, p, polygon, points), points); 
 	}
 	if (parent == null || parent.length !== polygon.length) { activity = false; }
-	else { activity = isPolygon(parent, polygon); } 
+	else { activity = isSamePolygon(parent, polygon); } 
 	activity ? console.log("active") : console.log("not active");
 	return activity;
 }

@@ -70,7 +70,7 @@ window.addEventListener('load', () => {
 
 	$('btn-k-out').addEventListener('click', () => {
 		setPrimaryButton('k-out');
-		if (state.polygons.length === 0 && state.hull) {
+		if (state.polygons.length === 0 && state.hull != null) {
 			state.polygons = enumarator.enumerateAtMostKOutPolygons(state.points, state.k);
 			state.idx = 0;
 		} else { state.idx = (state.idx + 1) % state.polygons.length; }
