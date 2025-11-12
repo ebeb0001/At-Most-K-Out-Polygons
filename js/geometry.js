@@ -124,6 +124,18 @@ export function segmentHitsPolygon(u, v, polygon) {
 	return false;
 }
 
+export function isPolygon(polygon, P) {
+	console.log("chekiing if the two polygons are the same", polygon, P);
+	for (const point of polygon) {
+		if (!P.includes(point)) { 
+			console.log("not the same", point);
+			return false; 
+		}
+	}
+	console.log("same");
+	return true;
+}
+
 // function from paper
 
 export function cmp(p_i, p_j, points) {
@@ -445,36 +457,17 @@ export function isActive(p_i, p, p_j, polygon, outsidePoints, points, k) {
 // if dig(P, pi , p) and rmv(P, pj ) are children of P, respectively. 
 
 	let activity = true;
+	let parent = null;
 	if (p_i == null && p == null) { 
 		console.log("checking the activity of point", p_j);
-		const parent = par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints, points);
-		if (parent == null) { activity = false; }
-		else if (parent.length === polygon.length) {
-			for (let i = 0; i < parent.length; i++) {
-				if (parent[i] !== polygon[i]) {
-					activity = false;
-					break;
-				}
-			}
-		} else { activity = false; }
-		// const activity = par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints, points) === polygon;
-		activity ? console.log("active") : console.log("not active");
-		return activity; 
+		parent = par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints, points);
 	} else if (p_j == null) { 
 		console.log("checking the activity of pair", p_i, p);
-		const parent = par(dig(p_i, p, polygon, points), outsidePoints, points); 
-		if (parent == null) { activity = false; }
-		else if (parent.length === polygon.length) {
-			for (let i = 0; i < parent.length; i++) {
-				if (parent[i] !== polygon[i]) {
-					activity = false;
-					break;
-				}
-			}
-		} else { activity = false; }
-		activity ? console.log("active") : console.log("not active");
-		return activity;
+		parent = par(dig(p_i, p, polygon, points), outsidePoints, points); 
 	}
+	if (parent == null || parent.length !== polygon.length) { activity = false; }
+	else { activity = isPolygon(parent, polygon); } 
+	activity ? console.log("active") : console.log("not active");
 }
 
 export function embeddableVertices(polygon, outsidePoints) {
