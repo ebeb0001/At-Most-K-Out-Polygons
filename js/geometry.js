@@ -1,11 +1,34 @@
-// classes
-
+/**
+ * Represents a point in 2D space/
+ */
 export class Point {
+	/**
+	 * Creates a new Point instance/
+	 * 
+	 * @param {number} x The x-coordinate of the point.
+	 * @param {number} y The y-coordinate of the point.
+	 */
 	constructor(x, y) {
+		/** @type {number} */
 		this.x = x;
+		/** @type {number} */
 		this.y = y;
 	}
 
+	/**
+	 *  Checks whether two points have the same coordinates.
+	 * 
+	 * @param {Point} p The point to test. 
+	 * @returns {boolean} `true` if the point's x and y are equal (using ==) to the given point's coordinates,
+	 * otherwise `false`.
+	 */
+	isSame(p) { return this.x == p.x && this.y == p.y; }
+
+	/**
+	 * Draws the point as a circle at its coordinates
+	 * 
+	 * @returns {void}
+	 */
 	draw() {
 		circle(this.x, this.y, 8);
 	}
@@ -13,18 +36,54 @@ export class Point {
 
 // base functions 
 
+/**
+ * Computes the orientation determinant of three points. 
+ * 
+ * @param {Point} A The first point.
+ * @param {Point} B The second point.
+ * @param {Point} C The third point.
+ * @returns {number} The signed orientation value of the points
+ */
 function orient(A, B, C) {
 	return -((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x));
 }
 
+/**
+ * Determines whether the orientation determinant represents a right turn
+ * 
+ * @param {number} orient_det The orientation determinant.
+ * @returns {boolean} `true` if the the orientation indicates a left turn (counter clockwise), 
+ * otherwise `false`.
+ */
 function isLeftTurn(orient_det) { return orient_det > 0; }
 
+/**
+ * Determines whether the orientation determinant represents a right turn
+ * 
+ * @param {number} orient_det The orientation determinant.
+ * @returns {boolean} `true` if the the orientation indicates a right turn (clockwise), 
+ * otherwise `false`.
+ */
 function isRightTurn(orient_det) { return orient_det < 0; }
 
+/**
+ * Computes the Euclidean distance between two points.
+
+ * @param {Point} p The first point.
+ * @param {Point} q The second point.
+ * @returns {number} The Euclidean distance between points `p` and `q`.
+ */
 function euclidianDist(p, q) {
-	return Math.sqrt((p.x - q.x) ** 2 + (p.y - q.y) ** 2);
+	return Math.sqrt((p.x - q.x)**2 + (p.y - q.y)**2);
 }
 
+/**
+ * Sorts an array in counterclockwise order around the lowest point.
+ * 
+ * @param {Array<Point>} points The array of points to sort.
+ * @returns {Array<Point>} A new array of points sorted in counterclockwise order 
+ * with respect to the pivot `p0`.
+ */
 export function sortPoints(points) {
 	let p0 = points[0];
 	for (let i = 1; i < points.length; i++) {
@@ -41,6 +100,13 @@ export function sortPoints(points) {
 	return [p0, ...rest];
 }
 
+/**
+ * 	Tests whether a point lies inside a polygon using the even-odd ray-casting rule.
+ * 
+ * @param {Point} p The query point.
+ * @param {Array<Point>} polygon Vertices of the polygon in counterclockwise order.
+ * @returns {boolean} `true` if `p` is inside the polygon by the even-ood rulle, otherwise `false`.
+ */
 function isInsidePolygon(p, polygon) {
 	const line = p.y;
 	let nb_intersection = 0;
@@ -61,6 +127,17 @@ function isInsidePolygon(p, polygon) {
 	return nb_intersection % 2 === 1;
 }
 
+/**
+ * Filters a set of points based on whether they lie inside or outside of a given polygon.
+ * 
+ * @param {Array<Point>} points The array of points to test.
+ * @param {Array<Point>} polygon Vertices of the polyygon in counterclockwise order.
+ * @param {boolean} insidePoints If `true`, returns only the points inside the polygon;
+ * 
+ * If `false`, returns only the points inside the polygon;
+ * 
+ * @returns {Array<Point>} The subset of points that are either inside or outside the polygon. 
+ */
 export function insideOutsidePoints(points, polygon, insidePoints = true) {
 	const result = [];
 	const rest = points.filter((p) => !polygon.includes(p));
@@ -73,6 +150,12 @@ export function insideOutsidePoints(points, polygon, insidePoints = true) {
 	return result;
 }
 
+/**
+ * Computes the convex hull of a set of points using the Graham Scan algorithm. 
+ * 
+ * @param {Array<Point>} points The input array of points.
+ * @returns {Array<Point>} The points forming the convex hull, in counterclockwise order.
+ */
 export function convexHullGrahamScan(points) {
 	points = sortPoints(points);
 	var hull = [];
@@ -87,6 +170,16 @@ export function convexHullGrahamScan(points) {
 	return hull;
 }
 
+/**
+ * Determines whether a point lies inside a triangle using orientation tests.
+ * 
+ * @param {Point} a The first vertex of the triangle.
+ * @param {Point} b The second vertex of the triangle.
+ * @param {Point} c The third vertex of the triangle.
+ * @param {Point} p The point to test.
+ * @returns {boolean} `true` if the point lies inside the triangle or on the boundary 
+ * of the triangle, otherwise `false`.
+ */
 function pointInTriangle(a, b, c, p) {
 	const orient1 = orient(a, b, p); 
 	const orient2 = orient(b, c, p);
@@ -98,6 +191,15 @@ function pointInTriangle(a, b, c, p) {
 	return false;
 }
 
+/**
+ * Determines whether two line segments intersect using oreintation tests.
+ * 
+ * @param {Point} a The first endpoint of the first segment.
+ * @param {Point} b The second endpoint of the first segment.
+ * @param {Point} u The first endpoint of the second segment.
+ * @param {Point} v The second endpoint of the second segment.
+ * @returns {boolean} `true` if the two segments properly intersect, otherwise `false`.
+ */
 function segmentIntersect(a, b, u, v) {
 	const orient1 = orient(u, v, a); 
 	const orient2 = orient(u, v, b);
@@ -111,28 +213,43 @@ function segmentIntersect(a, b, u, v) {
 	return false;
 }
 
+/**
+ * Checks whether a line segment intersect any edge of a polygon.
+ * 
+ * @param {Point} u First endpoint of the query segment.
+ * @param {Point} v Secondd endpoint of the query segment.
+ * @param {Array<Point>} polygon Vertices of the poltgon in counterclockwise order. 
+ * @returns {boolean} `true` if (u -> u) properly intersects any polygon edge 
+ * (excluding shared endpoints), otherwise `false`.
+ */
 function segmentHitsPolygon(u, v, polygon) {
 	for (let i = 0; i < polygon.length; i++) {
 		const p = polygon[i];
 		const succ_p = succ(p, polygon);
 		let verifiable = true;
-		if ((p === u || p === v) || (succ_p === u || succ_p === v)) { verifiable = false; }
+		if ((p.isSame(u) || p.isSame(v)) || (succ_p.isSame(u) || succ_p.isSame(v))) { verifiable = false; }
 		if (verifiable && segmentIntersect(p, succ_p, u, v)) { return true; }
 	}
 	return false;
 }
 
+/**
+ * Checks whether two polygons are identical **vertex-by-vertex in the same order**.
+ * 
+ * @param {Array<Point>} polygon The first polygon to compare.
+ * @param {Array<Point>} P The second polygon to compare.
+ * @returns {boolean} `true` if both polygons have the same length and each 
+ * `P[i]` is the same as `polygon[i]`, otherwise `false`.
+ */
 function isSamePolygon(polygon, P) {
 	console.log("checking if the two polygons are the same", polygon, P);
 	if (polygon.length !== P.length) {
 		console.log("not the same");
 		return false; 
 	}
-	polygon = sortPoints(polygon);
-	P = sortPoints(P);
 
 	for (let i = 0; i < P.length; i++) {
-		if (polygon[i] !== P[i]) { 
+		if (!P[i].isSame(polygon[i])) { 
 			console.log("not the same", polygon[i]);
 			return false; 
 		}
@@ -198,8 +315,7 @@ function embedPoint(polygon, p_i) {
 // and insert the edge (pred(pi),succ(pi)). We denote by emb(P, pi) the simple polygon obtained from P 
 // by applying the embedment of pi to P
 
-	// return sortPoints(polygon.filter((p) => p !== p_i));
-	return polygon.filter((p) => p !== p_i);
+	return polygon.filter((p) => !p.isSame(p_i));
 }
 
 function isInsertable(p, idx, polygon, outsidePoints) {
@@ -226,7 +342,7 @@ function isInsertable(p, idx, polygon, outsidePoints) {
 		return false;
 	}
 
-	const rest = outsidePoints.filter((p_i) => p_i !== p);
+	const rest = outsidePoints.filter((q) => !q.isSame(p));
 	for (const q of rest) {
 		if (pointInTriangle(p_i, p, succ_p_i, q)) {
 			console.log("not insertable 4");
@@ -390,7 +506,7 @@ function isDigable(p_i, p, polygon, points) {
 		return false;
 	}
 
-	const rest = points.filter((q) => q !== p && q !== p_i && q !== succ_p_i);
+	const rest = points.filter((q) => !q.isSame(p) && !q.isSame(p_i) && !q.isSame(succ_p_i));
 	for (const q of rest) {
 		if (pointInTriangle(p_i, p, succ_p_i, q)) {
 			console.log("not digable 4");
@@ -436,7 +552,7 @@ function isRemovable(p_i, polygon, outsidePoints, points, k) {
 		return false;
 	}
 
-	const rest = points.filter((q) => q !== pred_p_i && q !== p_i && q !== succ_p_i);
+	const rest = points.filter((q) => !q.isSame(pred_p_i) && !q.isSame(p_i) && !q.isSame(succ_p_i));
 	for (const q of rest) {
 		if (pointInTriangle(pred_p_i, succ_p_i, p_i, q)) {
 			console.log("not embeddable 3");
