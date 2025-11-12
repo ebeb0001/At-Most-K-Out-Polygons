@@ -104,7 +104,12 @@ export function segmentIntersect(a, b, u, v) {
 	const orient1 = orient(u, v, a); 
 	const orient2 = orient(u, v, b);
 	if ((isLeftTurn(orient1) && isRightTurn(orient2)) 
-	|| (isRightTurn(orient1) && isLeftTurn(orient2))) { return true; }
+	|| (isRightTurn(orient1) && isLeftTurn(orient2))) { 
+		const orient3 = orient(a, b, u);
+		const orient4 = orient(a, b, v);
+		if ((isLeftTurn(orient3) && isRightTurn(orient4)) 
+		|| (isRightTurn(orient3) && isLeftTurn(orient4))) { return true; } 
+	}
 	return false;
 }
 
@@ -112,8 +117,9 @@ export function segmentHitsPolygon(u, v, polygon) {
 	for (let i = 0; i < polygon.length; i++) {
 		const p = polygon[i];
 		const succ_p = succ(p, polygon);
-		if ((p === u && succ_p === v) || (p === v && succ_p === u)) { continue; }
-		if (segmentIntersect(p, succ_p, u, v)) { return true; }
+		let verifiable = true;
+		if ((p === u || p === v) || (succ_p === u || succ_p === v)) { verifiable = false; }
+		if (verifiable && segmentIntersect(p, succ_p, u, v)) { return true; }
 	}
 	return false;
 }
@@ -149,7 +155,7 @@ export function isEmbeddable(p_i, polygon, outsidePoints) {
 	console.log("checking embeddability of point ", p_i);
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not embeddable 1");
 		return false; 
 	}
@@ -186,7 +192,7 @@ export function isInsertable(p, idx, polygon, outsidePoints) {
 	console.log("checking insertability of point ", p);
 	const p_i = polygon[idx];
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(p, p_i, succ_p_i))) { 
+	if (isRightTurn(orient(p_i, p, succ_p_i))) { 
 		console.log("not insertable 1");
 		return false; 
 	}
@@ -294,7 +300,8 @@ export function clop(polygon, outsidePoints) {
 	for (const p of outsidePoints) {
 		const q = cloe(p, polygon, outsidePoints);
 		const distance = dist(q, p, polygon);
-		if (distance < min_dist) { 
+		if ((distance < min_dist) 
+		|| (distance === min_dist && (p.x > min_p.x && p.y > min_p.y))) { 
 			min_p = p; 
 			min_dist = distance;
 		}
@@ -350,7 +357,7 @@ export function isDigable(p_i, p, polygon, points) {
 
 	const succ_p_i = succ(p_i, polygon);
 	console.log("checking the digability of pair", p_i, p);
-	if (isRightTurn(orient(p_i, succ_p_i, p))) {
+	if (isLeftTurn(orient(p_i, succ_p_i, p))) {
 		console.log("not digable 1");
 		return false; 
 	}
