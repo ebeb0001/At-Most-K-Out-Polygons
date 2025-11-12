@@ -21,12 +21,15 @@ let canvas;
 let dragIndex = -1;
 
 function setRandomPreset(nb_points) {
-	const points = [];
+	const points = [];	
+	const EPS = 1e-9;
 	for (let i = 0; i < nb_points; i++) {
-		points.push(new geometry.Point(
+		const p = new geometry.Point(
 			Math.floor(Math.random() * (width + 1)), 
 			Math.floor(Math.random() * (height + 1))
-		));
+		);
+		if (points.some(q => Math.abs(q.y - p.y) < EPS)) { p.y += EPS; }
+		points.push(p);
 	}
 	return points;
 }
@@ -255,7 +258,7 @@ function updateStats() {
 
 	if (state.showLabels && state.points.length > 0 && state.mode !== 'drag') {
 		if (state.hull.length === 0) return;
-		state.hull = geometry.sortPoints(state.hull);
+		state.hull = state.hull;
 		const rest = state.points.filter((p) => !state.hull.includes(p));
 		state.points = state.hull.concat(rest);
 	}
