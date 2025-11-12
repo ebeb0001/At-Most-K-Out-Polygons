@@ -124,6 +124,10 @@ export function segmentHitsPolygon(u, v, polygon) {
 
 export function isPolygon(polygon, P) {
 	console.log("checking if the two polygons are the same", polygon, P);
+	if (polygon.length !== P.length) {
+		console.log("not the same");
+		return false; 
+	}
 	for (const point of polygon) {
 		if (!P.includes(point)) { 
 			console.log("not the same", point);
@@ -165,10 +169,6 @@ export function isEmbeddable(p_i, polygon, outsidePoints) {
 	console.log("checking embeddability of point ", p_i);
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	// console.log(pred_p_i);
-	// console.log(p_i);
-	// console.log(succ_p_i);
-	// console.log(orient(pred_p_i, p_i, succ_p_i));
 	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not embeddable 1");
 		return false; 
@@ -253,29 +253,25 @@ export function dist(p_i, p, polygon) {
 	return euclidianDist(middle_point, p);
 }
 
-export function cloe(p, polygon, outsidePoints) {
+export function cloe(p, polygon, outsidePoints) {	
 // We denote the closest edge of P among the edges insertable from p by
 // cloe(P, p). If ties exist, the largest edge is cloe(P, p).
 
 	console.log("searching for the closest edge to point ", p);
-	// polygon = sortPoints(polygon);
 	let min_dist = Infinity;
 	let min_q = null;
+	let size_edge_min = 0;
 	for (let i = 0; i < polygon.length; i++) {
+		console.log("testing for edge", polygon[i]);
 		if (isInsertable(p, i, polygon, outsidePoints)) {
 			const q = polygon[i];
 			const distance = dist(q, p, polygon);
-			console.log(distance);
-			if (distance < min_dist) { 
+			const size_edge = euclidianDist(q, succ(q, polygon));
+			if (distance < min_dist || (distance === min_dist && size_edge > size_edge_min)) {
+				console.log("found a new closest edge");
 				min_dist = distance;
 				min_q = q;
-			} else {
-				const size_edge_1 = euclidianDist(min_q, succ(min_q, polygon));
-				const size_edge_2 = euclidianDist(q, succ(q, polygon));
-				if (size_edge_2 < size_edge_1) {
-					min_dist = distance;
-					min_q = q;
-				}
+				size_edge_min = size_edge;
 			}
 		}
 	}
@@ -307,16 +303,20 @@ export function clop(polygon, outsidePoints) {
 // A point p ∈ iout(P) is the closest outside point, denoted by clop(P), of P if
 // dist(cloe(P, p), p) = min q∈iout(P) {dist(cloe(P, q), q)}
 
-	console.log("searching the closest outside point");
+	console.log("searching the closest outside point", outsidePoints);
 	let min_dist = Infinity;
 	let min_p = null;
 	for (const p of outsidePoints) {
+		console.log("testing for point", p);
 		const q = cloe(p, polygon, outsidePoints);
-		const distance = dist(q, p, polygon);
-		if ((distance < min_dist) 
-		|| (distance === min_dist && (p.x > min_p.x && p.y > min_p.y))) { 
-			min_p = p; 
-			min_dist = distance;
+		if (q != null) {
+			const distance = dist(q, p, polygon);
+			if ((distance < min_dist) 
+			|| (distance === min_dist && (p.x > min_p.x || (p.x === min_p.x && p.y > min_p.y)))) {
+				console.log("found a new closest outside point");
+				min_p = p; 
+				min_dist = distance;
+			}
 		}
 	}
 	console.log("min_p", min_p);
@@ -357,7 +357,6 @@ export function par(polygon, outsidePoints, points) {
 			parent = insertPoint(polygon, closest_outside_point, polygon.indexOf(closest_edge));
 		} else { parent = embedPoint(polygon, p); }
 		console.log("parent", parent);
-		// return sortPoints(parent);
 		return parent;
 	}
 }
@@ -384,7 +383,7 @@ export function isDigable(p_i, p, polygon, points) {
 		return false;
 	}
 
-	const rest = points.filter((q) => q !== p_i && q !== p_i && q !== succ_p_i);
+	const rest = points.filter((q) => q !== p && q !== p_i && q !== succ_p_i);
 	for (const q of rest) {
 		if (pointInTriangle(p_i, p, succ_p_i, q)) {
 			console.log("not digable 4");
@@ -419,7 +418,7 @@ export function isRemovable(p_i, polygon, outsidePoints, points, k) {
 	}
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not removable 2");
 		return false; 
 	}
@@ -429,7 +428,7 @@ export function isRemovable(p_i, polygon, outsidePoints, points, k) {
 		return false;
 	}
 
-	const rest = points.filter((q) => q !== p_i && q !== p_i && q !== succ_p_i);
+	const rest = points.filter((q) => q !== pred_p_i && q !== p_i && q !== succ_p_i);
 	for (const q of rest) {
 		if (pointInTriangle(pred_p_i, succ_p_i, p_i, q)) {
 			console.log("not embeddable 3");

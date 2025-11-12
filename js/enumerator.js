@@ -2,7 +2,9 @@ import * as geometry from './geometry.js';
 
 export function enumerateAtMostKOutPolygons(points, k) {
 	let hull = geometry.convexHullGrahamScan(points);
-	return findChildren(points, hull, null, 0, [], k);
+	let tree = findChildren(points, hull, null, 0, [], k);
+	console.log("size of tree", tree.length);
+	return tree;
 }
 
 export function findChildren(points, polygon, p_j, embeddable_vertices, children, k) {
@@ -30,5 +32,6 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 			null, embeddable_vertices.length, children);
 		}
 	}
+	console.log("end");
 	return children;
 }
