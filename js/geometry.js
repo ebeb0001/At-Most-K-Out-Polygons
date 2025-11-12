@@ -19,9 +19,9 @@ export function orient(A, B, C) {
 	return det;
 }
 
-export function isLeftTurn(orient_det) { return orient_det < 0; }
+export function isLeftTurn(orient_det) { return orient_det > 0; }
 
-export function isRightTurn(orient_det) { return orient_det > 0; }
+export function isRightTurn(orient_det) { return orient_det < 0; }
 
 export function euclidianDist(p, q) {
 	return Math.sqrt((p.x - q.x) ** 2 + (p.y - q.y) ** 2);
@@ -30,35 +30,41 @@ export function euclidianDist(p, q) {
 export function sortPoints(points) {
 	let p0 = points[0];
 	for (let i = 1; i < points.length; i++) {
-		if (points[i].x < p0.x || (points[i].x === p0.x && points[i].y > p0.y)) {
+		if (points[i].x < p0.x || (points[i].x === p0.x && points[i].y < p0.y)) {
 		p0 = points[i];
 		}
 	}
-	const rest = points.filter((p) => p !== p0);
-	rest.sort((p, q) => {
+	const rest = points.filter((p) => p !== p0).sort((p, q) => {
 		const orient_p = orient(p0, p, q);
-		if (orient_p !== 0) { return -orient_p; }
+		if (isLeftTurn(orient_p)) { return -1; }
+		if (isRightTurn(orient_p)) { return 1; }
 		return euclidianDist(p0, p) - euclidianDist(p0, q);
-	}).reverse();
+	}).toReversed();
 	return [p0, ...rest];
 }
 
 export function insideOutsidePoints(points, polygon, insidePoints = true) {
 	const result = [];
-	for (const p of points) {
-		let isInside = true;
-		if (!polygon.includes(p)) {
-			for (let i = 0; i < polygon.length; i++) {
-				const A = polygon[i];
-				const B = polygon[(i + 1) % polygon.length];
-				if (isRightTurn(orient(A, B, p))) {
-					isInside = false;
-					break;
-				}
+	const rest = points.filter((p) => !polygon.includes(p));
+	for (const p of rest) {
+		let segments = [];
+		const line = p.y;
+		const intersection = [];
+		for (const q of polygon) {
+			const succ_q = succ(q, polygon);
+			if ((q.y <= line && succ_q.y >= line) 
+				|| (q.y >= line && succ_q.y <= line)) {
+				intersection.push(q);
 			}
-			if ((insidePoints && isInside) 
-			|| (!insidePoints && !isInside)) { result.push(p); }
 		}
+		for (const q of intersection) {
+			const above = q.y <= succ(q, polygon).y ? q : succ(q, polygon);
+			const under = q === above ? succ(q, polygon) : q;
+			if (isRightTurn(orient(above, under, p))) { segments.push(q); }
+		}
+		if ((segments.length % 2 === 1 && insidePoints) 
+		|| (segments.length % 2 === 0 && !insidePoints)) { result.push(p); }
+
 	}
 	return result;
 }
@@ -69,7 +75,7 @@ export function convexHullGrahamScan(points) {
 
 	for (const p of points) {
 		while (hull.length >= 2 &&
-		isRightTurn(orient(hull[hull.length - 2], hull[hull.length - 1], p))) {
+		isLeftTurn(orient(hull[hull.length - 2], hull[hull.length - 1], p))) {
 			hull.pop();
 		}
 		hull.push(p);
@@ -109,8 +115,19 @@ export function isEmbeddable(p_i, polygon, outsidePoints) {
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
 	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
-		console.log("not embeddable");
+		console.log("not embeddable 1");
 		return false; 
+	}
+
+	for (const q of polygon) {
+		const succ_q = succ(q, polygon);
+		if (![pred_p_i, p_i, succ_p_i].includes(q) && ![pred_p_i, p_i, succ_p_i].includes(succ_q)) {
+			if ((isLeftTurn(orient(pred_p_i, succ_p_i, q)) && isRightTurn(orient(pred_p_i, succ_p_i, succ_q))) 
+			|| (isRightTurn(orient(pred_p_i, succ_p_i, q)) && isLeftTurn(orient(pred_p_i, succ_p_i, succ_q)))) {
+				console.log("not embeddable 2");
+				return false; 
+			}
+		}
 	}
 
 	for (const q of outsidePoints) {
@@ -118,7 +135,7 @@ export function isEmbeddable(p_i, polygon, outsidePoints) {
 		const orient2 = orient(succ_p_i, p_i, q);
 		const orient3 = orient(p_i, pred_p_i, q);
 		if (isLeftTurn(orient1) && isLeftTurn(orient2) && isLeftTurn(orient3)) {
-			console.log("not embeddable");
+			console.log("not embeddable 3");
 			return false;
 		}
 	}
@@ -131,7 +148,8 @@ export function embedPoint(polygon, p_i) {
 // and insert the edge (pred(pi),succ(pi)). We denote by emb(P, pi) the simple polygon obtained from P 
 // by applying the embedment of pi to P
 
-	return sortPoints(polygon.filter((p) => p !== p_i));
+	// return sortPoints(polygon.filter((p) => p !== p_i));
+	return polygon.filter((p) => p !== p_i);
 }
 
 export function isInsertable(p, idx, polygon, outsidePoints) {
@@ -139,12 +157,28 @@ export function isInsertable(p, idx, polygon, outsidePoints) {
 // if the triangle consisting of p, pi, and succ(pi) does not intersect the interior of P 
 // and includes no point in out(P). 
 
-	console.log("checking embeddability of point ", p);
+	console.log("checking insertability of point ", p);
 	const p_i = polygon[idx];
 	const succ_p_i = succ(p_i, polygon);
-	if (isLeftTurn(orient(p, p_i, succ_p_i))) { 
-		console.log("not embeddable");
+	if (isRightTurn(orient(p, p_i, succ_p_i))) { 
+		console.log("not insertable 1");
 		return false; 
+	}
+
+	for (const q of polygon) {
+		const succ_q = succ(q, polygon);
+		if (![p_i, succ_p_i].includes(q) && ![p_i, succ_p_i].includes(succ_q)) {
+			if ((isLeftTurn(orient(p_i, p, q)) && isRightTurn(orient(p_i, p, succ_q))) 
+			|| (isRightTurn(orient(p_i, p, q)) && isLeftTurn(orient(p_i, p, succ_q)))) {
+				console.log("not insertable 2");
+				return false; 
+			}
+			if ((isLeftTurn(orient(p, succ_p_i, q)) && isRightTurn(orient(p, succ_p_i, succ_q))) 
+			|| (isRightTurn(orient(p, succ_p_i, q)) && isLeftTurn(orient(p, succ_p_i, succ_q)))) {
+				console.log("not insertable 3");
+				return false; 
+			}
+		}
 	}
 
 	const rest = outsidePoints.filter((p_i) => p_i !== p);
@@ -153,11 +187,11 @@ export function isInsertable(p, idx, polygon, outsidePoints) {
 		const orient2 = orient(p, succ_p_i, q);
 		const orient3 = orient(succ_p_i, p_i, q);
 		if (isLeftTurn(orient1) && isLeftTurn(orient2) && isLeftTurn(orient3)) {
-			console.log("not embeddable");
+			console.log("not insertable 4");
 			return false;
 		}
 	}
-	console.log("embeddable");
+	console.log("insertable");
 	return true;
 }
 
@@ -168,7 +202,8 @@ export function insertPoint(polygon, p, idx) {
 // by applying the insertion of p to (pi,succ(pi)) on P.
 
 	const new_polygon = polygon.toSpliced(idx + 1, 0, p);
-	return sortPoints(new_polygon);
+	// return sortPoints(new_polygon);
+	return new_polygon;
 }
 
 export function dist(p_i, p, polygon) {
@@ -242,7 +277,10 @@ export function clop(polygon, outsidePoints) {
 	for (const p of outsidePoints) {
 		const q = cloe(p, polygon, outsidePoints);
 		const distance = dist(q, p, polygon);
-		if (distance < min_dist) { min_p = p; }
+		if (distance < min_dist) { 
+			min_p = p; 
+			min_dist = distance;
+		}
 	}
 	console.log("min_p", min_p);
 	return min_p;
@@ -282,7 +320,8 @@ export function par(polygon, outsidePoints, points) {
 			parent = insertPoint(polygon, closest_outside_point, polygon.indexOf(closest_edge));
 		} else { parent = embedPoint(polygon, p); }
 		console.log("parent", parent);
-		return sortPoints(parent);
+		// return sortPoints(parent);
+		return parent;
 	}
 }
 
@@ -292,10 +331,26 @@ export function isDigable(p_i, p, polygon, points) {
 // does not contain any point of S.
 
 	const succ_p_i = succ(p_i, polygon);
-	console.log("checking the digability of points", p_i, p);
-	if (isLeftTurn(orient(p_i, p, succ_p_i))) { 
-		console.log("not digable");
+	console.log("checking the digability of pair", p_i, p);
+	if (isRightTurn(orient(p_i, succ_p_i, p))) {
+		console.log("not digable 1");
 		return false; 
+	}
+
+	for (const q of polygon) {
+		const succ_q = succ(q, polygon);
+		if (![p_i, succ_p_i].includes(q) && ![p_i, succ_p_i].includes(succ_q)) {
+			if ((isLeftTurn(orient(p_i, p, q)) && isRightTurn(orient(p_i, p, succ_q))) 
+			|| (isRightTurn(orient(p_i, p, q)) && isLeftTurn(orient(p_i, p, succ_q)))) {
+				console.log("not digable 2");
+				return false; 
+			}
+			if ((isLeftTurn(orient(p, succ_p_i, q)) && isRightTurn(orient(p, succ_p_i, succ_q))) 
+			|| (isRightTurn(orient(p, succ_p_i, q)) && isLeftTurn(orient(p, succ_p_i, succ_q)))) {
+				console.log("not digable 3");
+				return false; 
+			}
+		}
 	}
 
 	const rest = points.filter((q) => q !== p_i);
@@ -303,8 +358,8 @@ export function isDigable(p_i, p, polygon, points) {
 		const orient1 = orient(p_i, succ_p_i, point);
 		const orient2 = orient(succ_p_i, p, point);
 		const orient3 = orient(p, p_i, point);
-		if (isRightTurn(orient1) && isRightTurn(orient2) && isRightTurn(orient3)) {
-			console.log("not digable");
+		if (isLeftTurn(orient1) && isLeftTurn(orient2) && isLeftTurn(orient3)) {
+			console.log("not digable 4");
 			return false;
 		}
 	}
@@ -331,14 +386,26 @@ export function isRemovable(p_i, polygon, outsidePoints, points, k) {
 
 	console.log("checking the removability of point", p_i);
 	if (outsidePoints != null && outsidePoints.length >= k) { 
-		console.log("not removable");
+		console.log("not removable 1");
 		return false; 
 	}
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
-		console.log("not removable");
+	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+	// if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+		console.log("not removable 2");
 		return false; 
+	}
+
+	for (const q of polygon) {
+		const succ_q = succ(q, polygon);
+		if (![pred_p_i, p_i, succ_p_i].includes(q) && ![pred_p_i, p_i, succ_p_i].includes(succ_q)) {
+			if ((isLeftTurn(orient(pred_p_i, succ_p_i, q)) && isRightTurn(orient(pred_p_i, succ_p_i, succ_q))) 
+			|| (isRightTurn(orient(pred_p_i, succ_p_i, q)) && isLeftTurn(orient(pred_p_i, succ_p_i, succ_q)))) {
+				console.log("not removable 3");
+				return false; 
+			}
+		}
 	}
 
 	const rest = points.filter((q) => q !== p_i);
@@ -346,8 +413,8 @@ export function isRemovable(p_i, polygon, outsidePoints, points, k) {
 		const orient1 = orient(pred_p_i, succ_p_i, point);
 		const orient2 = orient(succ_p_i, p_i, point);
 		const orient3 = orient(p_i, pred_p_i, point);
-		if (isRightTurn(orient1) && isRightTurn(orient2) && isRightTurn(orient3)) {
-			console.log("not removable");
+		if (isLeftTurn(orient1) && isLeftTurn(orient2) && isLeftTurn(orient3)) {
+			console.log("not removable 4");
 			return false;
 		}
 	}
@@ -376,7 +443,7 @@ export function isActive(p_i, p, p_j, polygon, outsidePoints, points, k) {
 		console.log("checking the activity of point", p_j);
 		const parent = par(rmv(polygon, p_j, outsidePoints, points, k), outsidePoints, points);
 		if (parent == null) { activity = false; }
-		if (parent.length === polygon.length) {
+		else if (parent.length === polygon.length) {
 			for (let i = 0; i < parent.length; i++) {
 				if (parent[i] !== polygon[i]) {
 					activity = false;
@@ -391,7 +458,7 @@ export function isActive(p_i, p, p_j, polygon, outsidePoints, points, k) {
 		console.log("checking the activity of pair", p_i, p);
 		const parent = par(dig(p_i, p, polygon, points), outsidePoints, points); 
 		if (parent == null) { activity = false; }
-		if (parent.length === polygon.length) {
+		else if (parent.length === polygon.length) {
 			for (let i = 0; i < parent.length; i++) {
 				if (parent[i] !== polygon[i]) {
 					activity = false;
