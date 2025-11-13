@@ -85,11 +85,11 @@ function euclidianDist(p, q) {
 export function sortPoints(points) {
 	let p0 = points[0];
 	for (let i = 1; i < points.length; i++) {
-		if (points[i].x < p0.x || (points[i].x === p0.x && points[i].y < p0.y)) {
+		if (points[i].x < p0.x || (points[i].x == p0.x && points[i].y < p0.y)) {
 		p0 = points[i];
 		}
 	}
-	const rest = points.filter((p) => p !== p0).sort((p, q) => {
+	const rest = points.filter((p) => !p.isSame(p0)).sort((p, q) => {
 		const orient_p = orient(p0, p, q);
 		if (isLeftTurn(orient_p)) { return -1; }
 		if (isRightTurn(orient_p)) { return 1; }
@@ -122,7 +122,7 @@ function isInsidePolygon(p, polygon) {
 		const under = q.y < succ_q.y ? q : succ_q;
 		if (isLeftTurn(orient(above, under, p))) { nb_intersection++; }
 	}
-	return nb_intersection % 2 === 1;
+	return nb_intersection % 2 == 1;
 }
 
 /**
@@ -138,7 +138,12 @@ function isInsidePolygon(p, polygon) {
  */
 export function insideOutsidePoints(points, polygon, inside_points = true) {
 	const result = [];
-	const rest = points.filter((p) => !polygon.includes(p));
+	const rest = points.filter((p) => {
+		for (const q of polygon) {
+			if (q.isSame(p)) { return false; }
+		}
+		return true;
+	});
 	for (const p of rest) {
 		const is_inside = isInsidePolygon(p, polygon);
 		if ((is_inside && inside_points) 
@@ -312,7 +317,8 @@ function embedPoint(polygon, p_i) {
 // and insert the edge (pred(pi),succ(pi)). We denote by emb(P, pi) the simple polygon obtained from P 
 // by applying the embedment of pi to P
 
-	return polygon.filter((p) => !p.isSame(p_i));
+	const new_polygon = polygon.map((p) => new Point(p.x, p.y)).filter((p) => !p.isSame(p_i));
+	return new_polygon;
 }
 
 function isInsertable(p, idx, polygon, outside_points) {
@@ -355,7 +361,7 @@ function insertPoint(polygon, p, idx) {
 // We denote by ins(P,(pi,succ(pi)), p) the simple polygon obtained from P 
 // by applying the insertion of p to (pi,succ(pi)) on P.
 
-	const new_polygon = polygon.toSpliced(idx + 1, 0, p);
+	let new_polygon = polygon.map((p) => new Point(p.x, p.y)).toSpliced(idx + 1, 0, p);
 	return new_polygon;
 }
 
@@ -385,7 +391,7 @@ function cloe(p, polygon, outside_points) {
 			const distance = dist(q, p, polygon);
 			const size_edge = euclidianDist(q, succ(q, polygon));
 			if (min_q == null || distance < min_dist 
-			|| (distance === min_dist && size_edge > size_edge_min_q)) {
+			|| (distance == min_dist && size_edge > size_edge_min_q)) {
 				console.log("found a new closest edge");
 				min_dist = distance;
 				min_q = q;
@@ -430,8 +436,8 @@ function clop(polygon, outside_points) {
 		const q = cloe(p, polygon, outside_points);
 		if (q != null) {
 			const distance = dist(q, p, polygon);
-			if ((distance < min_dist) || (distance === min_dist && 
-			(p.x > min_p.x || (p.x === min_p.x && p.y > min_p.y)))) {
+			if ((distance < min_dist) || (distance == min_dist && 
+			(p.x > min_p.x || (p.x == min_p.x && p.y > min_p.y)))) {
 				console.log("found a new closest outside point");
 				min_p = p; 
 				min_dist = distance;
@@ -526,7 +532,6 @@ export function dig(p_i, p, polygon, points) {
 		console.log("dig operation for point", p_i);
 		return insertPoint(polygon, p, polygon.indexOf(p_i));
 	}
-	// return polygon;
 }
 
 function isRemovable(p_i, polygon, outside_points, points, k) {
@@ -570,10 +575,9 @@ export function rmv(polygon, p_i, outside_points, points, k) {
 		console.log("remove operation for point", p_i);
 		return embedPoint(polygon, p_i);
 	}
-	// return polygon;	
 }
 
-export function isActive(p_i, p, p_j, polygon, outside_points, points, k, embeddable_vertices) {
+export function isActive(p_i, p, p_j, polygon, outside_points, points, k) {
 
 	let activity = false;
 	let pol = null;
@@ -582,7 +586,7 @@ export function isActive(p_i, p, p_j, polygon, outside_points, points, k, embedd
 		pol = rmv(polygon, p_j, outside_points, points, k);
 		if (pol != null) {
 			const outside = insideOutsidePoints(points, pol, false);
-			if (embeddableVertices(pol, outside) === 0 && p_j.isSame(clop(pol, outside))) {
+			if (embeddableVertices(pol, outside) == 0 && p_j.isSame(clop(pol, outside))) {
 				const pred_p_j = pred(p_j, polygon);
 				const succ_p_j = succ(p_j, polygon);
 				const closest_edge = cloe(p_j, pol, outside);
@@ -594,6 +598,7 @@ export function isActive(p_i, p, p_j, polygon, outside_points, points, k, embedd
 	} else if (p_j == null) { 
 		console.log("checking the activity of pair", p_i, p);
 		pol = dig(p_i, p, polygon, points);
+		console.log(pol);
 		if (pol != null) {
 			const outside = insideOutsidePoints(points, pol, false);
 			if (p.isSame(larg(pol, outside))) {

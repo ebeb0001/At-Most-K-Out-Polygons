@@ -20,7 +20,7 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 		if (geometry.cmp(q, p_i, polygon)) {
 			const inside_points = geometry.insideOutsidePoints(points, polygon);
 			for (const p of inside_points) {
-				if (geometry.isActive(p_i, p, null, polygon, outside_points, points, k, embeddable_vertices)) {
+				if (geometry.isActive(p_i, p, null, polygon, outside_points, points, k)) {
 					child = geometry.dig(p_i, p, polygon, points)
 					embeddable_vertices = geometry.embeddableVertices(child, outside_points);
 					findChildren(points, child, p_i, embeddable_vertices, children, k);
@@ -29,7 +29,7 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 		}
 	}
 	for (const p_i of polygon) {
-		if (geometry.isActive(null, null, p_i, polygon, outside_points, points, k, embeddable_vertices)) {
+		if (geometry.isActive(null, null, p_i, polygon, outside_points, points, k)) {
 			child = geometry.rmv(polygon, p_i, outside_points, points, k);
 			embeddable_vertices = geometry.embeddableVertices(child, outside_points);
 			findChildren(points, child, null, embeddable_vertices, children, k);
