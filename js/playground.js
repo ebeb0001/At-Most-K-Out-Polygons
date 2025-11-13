@@ -244,9 +244,12 @@ function updateStats() {
 	$('stat-k').textContent = state.k;
 
 	if (state.points.length >= 3) {
+		let polygon = null;
 		state.hull = geometry.convexHullGrahamScan(state.points);
-		state.inside = geometry.insideOutsidePoints(state.points, state.hull);
-		state.outside = geometry.insideOutsidePoints(state.points, state.hull, false);
+		if (state.idx > -1) { polygon = state.polygons[state.idx]; } 
+		else { polygon = state.hull; }
+		state.inside = geometry.insideOutsidePoints(state.points, polygon);
+		state.outside = geometry.insideOutsidePoints(state.points, polygon, false);
 	} else { 
 		state.hull = []; 
 		state.inside = [];
