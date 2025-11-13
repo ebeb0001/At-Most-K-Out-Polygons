@@ -29,9 +29,7 @@ export class Point {
 	 * 
 	 * @returns {void}
 	 */
-	draw() {
-		circle(this.x, this.y, 8);
-	}
+	draw() { circle(this.x, this.y, 8); }
 }
 
 // base functions 
@@ -289,8 +287,7 @@ function isEmbeddable(p_i, polygon, outsidePoints) {
 	console.log("checking embeddability of point ", p_i);
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i)) 
-	&& !isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+	if (isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not embeddable 1");
 		return false; 
 	}
@@ -326,8 +323,7 @@ function isInsertable(p, idx, polygon, outsidePoints) {
 	console.log("checking insertability of point ", p);
 	const p_i = polygon[idx];
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(p_i, p, succ_p_i)) 
-	&& !isLeftTurn(orient(p_i, p, succ_p_i))) { 
+	if (isRightTurn(orient(p_i, p, succ_p_i))) { 
 		console.log("not insertable 1");
 		return false; 
 	}
@@ -475,7 +471,9 @@ function par(polygon, points) {
 		let parent = null;
 		if (p == null) { 
 			const closest_outside_point = clop(polygon, outsidePoints);
+			if (closest_outside_point == null) { return null; }
 			const closest_edge = cloe(closest_outside_point, polygon, outsidePoints);
+			if (closest_edge == null) { return null; }
 			parent = insertPoint(polygon, closest_outside_point, polygon.indexOf(closest_edge));
 		} else { parent = embedPoint(polygon, p); }
 		console.log("parent", parent);
@@ -490,8 +488,7 @@ function isDigable(p_i, p, polygon, points) {
 
 	const succ_p_i = succ(p_i, polygon);
 	console.log("checking the digability of pair", p_i, p);
-	if (isLeftTurn(orient(p_i, p, succ_p_i)) 
-	&& !isRightTurn(orient(p_i, p, succ_p_i))) {
+	if (isLeftTurn(orient(p_i, p, succ_p_i))) {
 		console.log("not digable 1");
 		return false; 
 	}
@@ -506,7 +503,8 @@ function isDigable(p_i, p, polygon, points) {
 		return false;
 	}
 
-	const rest = points.filter((q) => !q.isSame(p) && !q.isSame(p_i) && !q.isSame(succ_p_i));
+	const rest = points.filter((q) => !q.isSame(p) && !q.isSame(p_i) 
+	&& !q.isSame(succ_p_i));
 	for (const q of rest) {
 		if (pointInTriangle(p_i, p, succ_p_i, q)) {
 			console.log("not digable 4");
@@ -541,8 +539,7 @@ function isRemovable(p_i, polygon, outsidePoints, points, k) {
 	}
 	const pred_p_i = pred(p_i, polygon);
 	const succ_p_i = succ(p_i, polygon);
-	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i)) && 
-	!isLeftTurn(orient(pred_p_i, p_i, succ_p_i))) { 
+	if (isRightTurn(orient(pred_p_i, p_i, succ_p_i))) { 
 		console.log("not removable 2");
 		return false; 
 	}
