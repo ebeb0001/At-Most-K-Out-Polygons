@@ -32,11 +32,19 @@
 				<div>
 					<h2>Prerequisites</h2>
 					<p>To fully understand how the algorithm works, this section will shortly explain the primitives used.</p>
-					<h3>Point set</h3>
-					<p>A point set to put it simply is like a bag full of pairs of coordinates that represent the positions of the different points on a plane.</p>
+					<h3>Point Set</h3>
+					<p>A point set S to put it simply is like a bag full of pairs of coordinates that represent the positions of the different points on a plane. 
+						This set needs to abide by a rule though, and it's that it's assumed to have geneneral position, which simply means that no 3 points can be collinear.</p>
+
+					<h3>Simple Polygon</h3>
+					<p>A simple polygon is a polygon that does not intersect itself. In other words, the edges of the polygon can only meet at their endpoints, 
+						and the polygon encloses a single continuous area with no holes.</p>
+
 
 					<h3>Inside/Outside</h3>
-
+					<p>This one is rather self explanatory. The points of the set S that are strictly inside of the borders of a given polygon are considered In(P)
+						and for the points that are strictly outside of said borders, they are considered as you would guess, Out(P). It's good to note that vertices of 
+						the given polygon P are neither in In(P) nor in Out(P). </p>
 					<h3>At-most-k-out</h3>
 
 					<h3>Convex Hull</h3>
