@@ -85,10 +85,8 @@ body{
 
 .hero h3{
 	margin: 0 0 8px;  
-	font-size: 13px;
+	font-size: 18px;
 	color: var(--accent-2);
-	/* text-transform: uppercase;
-	letter-spacing: 0.08em; */
 }
 
 .hero p{ 
