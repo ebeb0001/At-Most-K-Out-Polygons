@@ -94,6 +94,18 @@ body{
 	margin:0 0 12px; 
 }
 
+.hero ul {
+  margin: 8px 0 0;
+  padding-left: 1.5rem;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.hero ul li {
+  margin: 2px 0;
+}
+
+
 .playground{
 	margin-top:16px;
 	display:grid; 

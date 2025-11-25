@@ -9,6 +9,7 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+		<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"> </script>
 	</head>
 
 	<body>
@@ -33,8 +34,8 @@
 					<h2>Prerequisites</h2>
 					<p>To fully understand how the algorithm works, this section will shortly explain the primitives used.</p>
 					<h3>Point Set</h3>
-					<p>A point set S to put it simply is like a bag full of pairs of coordinates that represent the positions of the different points on a plane. 
-						This set needs to abide by a rule though, and it's that it's assumed to have geneneral position, which simply means that no 3 points can be collinear.</p>
+					<p>A point set S, to put it simply, is like a bag full of pairs of coordinates that represent the positions of the different points on a plane. 
+						This set needs to abide by a rule though, and it's that it's assumed to have general position, which simply means that no 3 points can be collinear.</p>
 
 					<h3>Simple Polygon</h3>
 					<p>A simple polygon is a polygon that does not intersect itself. In other words, the edges of the polygon can only meet at their endpoints, 
@@ -45,16 +46,59 @@
 					<p>This one is rather self explanatory. The points of the set S that are strictly inside of the borders of a given polygon are considered In(P)
 						and for the points that are strictly outside of said borders, they are considered as you would guess, Out(P). It's good to note that vertices of 
 						the given polygon P are neither in In(P) nor in Out(P). </p>
-					<h3>At-most-k-out</h3>
+					<h3>At-most-k-out Polygon</h3>
+					<p>By understanding the previous definitions, we can now define what an at-most-k-out polygon is. An at-most-k-out polygon P is a simple polygon such 
+					that the number of points from the point set S that lie outside of P is at most k (where k is a given integer), i.e. : </p>
+					<div style="text-align:center;">$$|\mathrm{out}(P)| \le k.$$</div> 
+					<p>A nice way to understand it is by thinking of the edges of the polygon as being a fence that enclose the In(P) points and leaving out at most k points in Out(P) </p>
+
 
 					<h3>Convex Hull</h3>
+					<p>By using the definitions as building blocks we progressively introduce more complex definitions. The convex hull of a point set S is the smallest convex polygon that can enclose all the points in S, 
+						which means that all the points in S are either 
+					on the boundary of the polygon or inside it, leaving Out(P) empty. You can think of it as the shape formed by stretching a rubber band around the outermost points in the set S. 
+					The convex hull is important because it provides a boundary that contains all the points in S, and is often used as a starting point for various geometric algorithms, including the one presented in this demo.
+					</p>
 
 				</div>
 			</section>
             <section class="hero card">
 				<div>
-					<h2>Algorithm</h2>
-					<p>blablabla.</p>
+					<h2>Enumeration Algorithm</h2>
+					<p>A high level explanation of how to enumerate all of the at-most-k-out polygons is by using a tree. The set of all possible at-most-k-out polygons is 
+						grouped into a family tree with the following structure:</p>
+						<ul>
+						<li>Node : An at-most-k-out polygon.</li>
+						<li>Root : The Convex Hull CH(S) of the set S.</li>
+						<li>Edge : the relation parent-child.</li>
+						</ul>
+
+						<p>With now a little bit of the structure in mind we can continue by defining other notions that will be needed for the algorithm like the concepts of embeddable and insertable.
+													</p>
+
+						<h3>Embeddable</h3>
+						<p>
+							An embeddable vertex is basically a corner of the polygon that we can safely
+							straighten out. More precisely, take a vertex <em>p<sub>i</sub></em> of a polygon <em>P</em>
+							and look at the small triangle formed by its two neighbours,
+							<em>pred(p<sub>i</sub>)</em> and <em>succ(p<sub>i</sub>)</em>. If this triangle lies completely
+							inside <em>P</em> and does not contain any point from <strong><code>out(P)</code></strong>, then
+							<em>p<sub>i</sub></em> is called an <strong>embeddable</strong> vertex.
+						</p>
+
+						<p>
+							Embedding an embeddable vertex just means removing that tiny ear. We delete the
+							two edges <em>(pred(p<sub>i</sub>), p<sub>i</sub>)</em> and <em>(p<sub>i</sub>, succ(p<sub>i</sub>))</em> and
+							replace them with a single edge <em>(pred(p<sub>i</sub>) to succ(p<sub>i</sub>))</em>, which keeps
+							the polygon simple and keeps the at-most-k-out property.
+						</p>
+
+						<h3>Insertable</h3>
+						<p>It uses kind of the same logic as embedding but this time we search for points that are in <strong><code>out(P)</code></strong> and with the same kind of manoeuvre by
+						creating a temporary triangle and if this triangle doesn't include other outside points and doesn't intersect P then we can add that point as a new vertex of the polygon P. </p>
+
+						<h3>Parent-Child</h3>
+						<p>Now with most of the notions setup we can explain how the paren</p>
 				</div>
 			</section>
         </main>
