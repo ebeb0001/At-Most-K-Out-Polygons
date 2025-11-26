@@ -34,30 +34,30 @@
 					<h2>Prerequisites</h2>
 					<p>To fully understand how the algorithm works, this section will shortly explain the primitives used.</p>
 					<h3>Point Set</h3>
-					<p>A point set S, to put it simply, is like a bag full of pairs of coordinates that represent the positions of the different points on a plane. 
-						This set needs to abide by a rule though, and it's that it's assumed to have general position, which simply means that no 3 points can be collinear.</p>
+					<p>A point set <strong><code>S</code></strong>, to put it simply, is like a bag full of pairs of coordinates that represent the positions of the different points on a plane. 
+						This set needs to abide by a rule though, and it's that it's assumed to have <em>general position</em>, which simply means that no 3 points can be collinear.</p>
 
 					<h3>Simple Polygon</h3>
-					<p>A simple polygon is a polygon that does not intersect itself. In other words, the edges of the polygon can only meet at their endpoints, 
+					<p>A <strong>simple polygon</strong> is a polygon that does not intersect itself. In other words, the edges of the polygon can only meet at their endpoints, 
 						and the polygon encloses a single continuous area with no holes.</p>
 
 
 					<h3>Inside/Outside</h3>
-					<p>This one is rather self explanatory. The points of the set S that are strictly inside of the borders of a given polygon are considered In(P)
-						and for the points that are strictly outside of said borders, they are considered as you would guess, Out(P). It's good to note that vertices of 
-						the given polygon P are neither in In(P) nor in Out(P). </p>
+					<p>This one is rather self explanatory. The points of the set <strong><code>S</code></strong> that are strictly inside of the borders of a given polygon are considered <strong><code>in(P)</code></strong>
+						and for the points that are strictly outside of said borders, they are considered as you would guess, <strong><code>out(P)</code></strong>. It's good to note that vertices of 
+						the given polygon <strong><code>P</code></strong> are neither in <strong><code>in(P)</code></strong> nor in <strong><code>out(P)</code></strong>. </p>
 					<h3>At-most-k-out Polygon</h3>
-					<p>By understanding the previous definitions, we can now define what an at-most-k-out polygon is. An at-most-k-out polygon P is a simple polygon such 
-					that the number of points from the point set S that lie outside of P is at most k (where k is a given integer), i.e. : </p>
+					<p>By understanding the previous definitions, we can now define what an <strong>at-most-k-out polygon</strong> is. An at-most-k-out polygon <strong><code>P</code></strong> is a simple polygon such 
+					that the number of points from the point set <strong><code>S</code></strong> that lie outside of <strong><code>P</code></strong> is at most <strong><code>k</code></strong> (where <strong><code>k</code></strong> is a given integer), i.e. : </p>
 					<div style="text-align:center;">$$|\mathrm{out}(P)| \le k.$$</div> 
-					<p>A nice way to understand it is by thinking of the edges of the polygon as being a fence that enclose the In(P) points and leaving out at most k points in Out(P) </p>
+					<p>A nice way to understand it is by thinking of the edges of the polygon as being a fence that enclose the <strong><code>in(P)</code></strong> points and leaving out at most <strong><code>k</code></strong> points in <strong><code>out(P)</code></strong> </p>
 
 
 					<h3>Convex Hull</h3>
-					<p>By using the definitions as building blocks we progressively introduce more complex definitions. The convex hull of a point set S is the smallest convex polygon that can enclose all the points in S, 
-						which means that all the points in S are either 
-					on the boundary of the polygon or inside it, leaving Out(P) empty. You can think of it as the shape formed by stretching a rubber band around the outermost points in the set S. 
-					The convex hull is important because it provides a boundary that contains all the points in S, and is often used as a starting point for various geometric algorithms, including the one presented in this demo.
+					<p>By using the definitions as building blocks we progressively introduce more complex definitions. The convex hull of a point set <strong><code>S</code></strong> is the smallest convex polygon that can enclose all the points in <strong><code>S</code></strong>, 
+						which means that all the points in <strong><code>S</code></strong> are either 
+					on the boundary of the polygon or inside it, leaving <strong><code>out(P)</code></strong> empty. You can think of it as the shape formed by stretching a rubber band around the outermost points in the set <strong><code>S</code></strong>. 
+					The convex hull is important because it provides a boundary that contains all the points in <strong><code>S</code></strong>, and is often used as a starting point for various geometric algorithms, including the one presented in this demo.
 					</p>
 
 				</div>
@@ -65,29 +65,29 @@
             <section class="hero card">
 				<div>
 					<h2>Enumeration Algorithm</h2>
-					<p>A high level explanation of how to enumerate all of the at-most-k-out polygons is by using a tree. The set of all possible at-most-k-out polygons is 
-						grouped into a family tree with the following structure:</p>
+					<p>A high level explanation of how to enumerate all of the <strong>at-most-k-out polygons</strong> is by using a tree. The set of all possible at-most-k-out polygons is 
+						grouped into a <strong>family tree</strong> with the following structure:</p>
 						<ul>
-						<li>Node : An at-most-k-out polygon.</li>
-						<li>Root : The Convex Hull CH(S) of the set S.</li>
-						<li>Edge : the relation parent-child.</li>
+						<li><strong>Node</strong> : An <strong>at-most-k-out polygon</strong>.</li>
+						<li><strong>Root</strong> : The Convex Hull <strong><code>CH(S)</code></strong> of the set <strong><code>S</code></strong>.</li>
+						<li><strong>Edge</strong> : the relation <strong>parent-child</strong>.</li>
 						</ul>
 
-						<p>With now a little bit of the structure in mind we can continue by defining other notions that will be needed for the algorithm like the concepts of embeddable and insertable.
+						<p>With now a little bit of the structure in mind we can continue by defining other notions that will be needed for the algorithm like the concepts of <strong>embeddable</strong> and <strong>insertable</strong>.
 													</p>
 
 						<h3>Embeddable</h3>
 						<p>
-							An embeddable vertex is basically a corner of the polygon that we can safely
-							straighten out. More precisely, take a vertex <em>p<sub>i</sub></em> of a polygon <em>P</em>
+							An <strong>embeddable vertex</strong> is basically a corner of the polygon that we can safely
+							straighten out. More precisely, take a vertex <em>p<sub>i</sub></em> of a polygon <strong><code>P</code></strong>
 							and look at the small triangle formed by its two neighbours,
-							<em>pred(p<sub>i</sub>)</em> and <em>succ(p<sub>i</sub>)</em>. If this triangle lies completely
-							inside <em>P</em> and does not contain any point from <strong><code>out(P)</code></strong>, then
+							<em><code>pred(p<sub>i</sub>)</code></em> and <em><code>succ(p<sub>i</sub>)</code></em>. If this triangle lies completely
+							inside <strong><code>P</code></strong> and does not contain any point from <strong><code>out(P)</code></strong>, then
 							<em>p<sub>i</sub></em> is called an <strong>embeddable</strong> vertex.
 						</p>
 
 						<p>
-							Embedding an embeddable vertex just means removing that tiny ear. We delete the
+							Embedding an <strong>embeddable vertex</strong> just means removing that tiny ear. We delete the
 							two edges <em>(pred(p<sub>i</sub>), p<sub>i</sub>)</em> and <em>(p<sub>i</sub>, succ(p<sub>i</sub>))</em> and
 							replace them with a single edge <em>(pred(p<sub>i</sub>) to succ(p<sub>i</sub>))</em>, which keeps
 							the polygon simple and keeps the at-most-k-out property.
@@ -95,23 +95,23 @@
 
 						<h3>Insertable</h3>
 						<p>It uses kind of the same logic as embedding but this time we search for points that are in <strong><code>out(P)</code></strong> and with the same kind of manoeuvre by
-						creating a temporary triangle and if this triangle doesn't include other outside points and doesn't intersect P then we can add that point as a new vertex of the polygon P. </p>
+						creating a temporary triangle and if this triangle doesn't include other outside points and doesn't intersect <strong><code>P</code></strong> then we can add that point as a new vertex of the polygon <strong><code>P</code></strong>. </p>
 
 						<h3>Largest Embeddable Vertex</h3>
-						<p>When a polygoon P has more than one embeddable vertex, we need a way that is consistent to find which one to embed first. To achieve this we assume the vertices of P are
+						<p>When a polygon <strong><code>P</code></strong> has more than one embeddable vertex, we need a way that is consistent to find which one to embed first. To achieve this we assume the vertices of <strong><code>P</code></strong> are
 						ordered in counter-clockwise order, starting from a fixed point. If we do a walk on the polygon in this order and mark every single embeddable vertex,
-						the largest embeddable vertex is defined as the embeddable vertex with the highest index in this order, i.e. the last embeddable vertex we find in our walk. This is the corner 
-						we will emebed first when doing the parent function par(P).</p>
+						the <strong>largest embeddable vertex</strong> is defined as the embeddable vertex with the highest index in this order, i.e. the last embeddable vertex we find in our walk. This is the corner 
+						we will emebed first when doing the parent function <strong><code>par(P)</code></strong>.</p>
 
 						<h3>Insertable Outside Point</h3>
-						<p>As explained in the insertable section, there are conditions to be able to insert a point from <strong><code>out(P)</code></strong> into the polygon P.
-						The set of points that satisfy the conditions are called insertable outisde points, so <strong><code>iout(P)</code></strong> contains exactly the outside
-						points that can be inserted into P without violating the at-most-k-out property. </p>
+						<p>As explained in the insertable section, there are conditions to be able to insert a point from <strong><code>out(P)</code></strong> into the polygon <strong><code>P</code></strong>.
+						The set of points that satisfy the conditions are called <strong>insertable outside points</strong>, so <strong><code>iout(P)</code></strong> contains exactly the outside
+						points that can be inserted into <strong><code>P</code></strong> without violating the at-most-k-out property. </p>
 
-						<h3>Closest Outisde Point</h3>
+						<h3>Closest Outside Point</h3>
 						<p>Among all of the instertable outside points, we still need a way to choose one in a deterministic way. The method used is to iterate over
-							the the insertable points <strong>p</strong>, then look at the edge where they would be inserted (by using <strong><code>cloe(P,p)</code></strong> which is the closest edge insertable from <strong>p</strong>), and measure the distance from the point to that
-							edge. We measure it by using Euclidean distance to the midpoint to the edge from the point <strong>p</strong>. Then we define <strong><code>clop(P)</code></strong> as the point with the smallest distance. This is the point we will insert when P has 
+							the the insertable points <strong><code>p</code></strong>, then look at the edge where they would be inserted (by using <strong><code>cloe(P,p)</code></strong> which is the closest edge insertable from <strong><code>p</code></strong>), and measure the distance from the point to that
+							edge. We measure it by using Euclidean distance to the midpoint to the edge from the point <strong><code>p</code></strong>. Then we define <strong><code>clop(P)</code></strong> as the point with the smallest distance. This is the point we will insert when <strong><code>P</code></strong> has 
 							no embeddable vertices adn we want to move to its parent.
 						</p>
 
