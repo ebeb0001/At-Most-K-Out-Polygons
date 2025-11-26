@@ -98,14 +98,50 @@
 						creating a temporary triangle and if this triangle doesn't include other outside points and doesn't intersect P then we can add that point as a new vertex of the polygon P. </p>
 
 						<h3>Largest Embeddable Vertex</h3>
-						When a polygoon P has more than one embeddable vertex, we need a way that is consistent to find which one to embed first. To achieve this we assume the vertices of P are
+						<p>When a polygoon P has more than one embeddable vertex, we need a way that is consistent to find which one to embed first. To achieve this we assume the vertices of P are
 						ordered in counter-clockwise order, starting from a fixed point. If we do a walk on the polygon in this order and mark every single embeddable vertex,
 						the largest embeddable vertex is defined as the embeddable vertex with the highest index in this order, i.e. the last embeddable vertex we find in our walk. This is the corner 
-						we will emebed first when doing the parent function par(P).
+						we will emebed first when doing the parent function par(P).</p>
+
 						<h3>Insertable Outside Point</h3>
-						As explained in the insertable section, there are conditions to be able to insert a point from <strong><code>out(P)</code></strong> into the polygon P.
+						<p>As explained in the insertable section, there are conditions to be able to insert a point from <strong><code>out(P)</code></strong> into the polygon P.
 						The set of points that satisfy the conditions are called insertable outisde points, so <strong><code>iout(P)</code></strong> contains exactly the outside
-						points that can be inserted into P without violating the at-most-k-out property.
+						points that can be inserted into P without violating the at-most-k-out property. </p>
+
+						<h3>Closest Outisde Point</h3>
+						<p>Among all of the instertable outside points, we still need a way to choose one in a deterministic way. The method used is to iterate over
+							the the insertable points <strong>p</strong>, then look at the edge where they would be inserted (by using <strong><code>cloe(P,p)</code></strong> which is the closest edge insertable from <strong>p</strong>), and measure the distance from the point to that
+							edge. We measure it by using Euclidean distance to the midpoint to the edge from the point <strong>p</strong>. Then we define <strong><code>clop(P)</code></strong> as the point with the smallest distance. This is the point we will insert when P has 
+							no embeddable vertices adn we want to move to its parent.
+						</p>
+
+						<h3>Parent Function</h3>
+						<p>Now that we introduced all of the local moves to move inside of the tree, we can introduce the parent function <code>par(P)</code> that is used to navigate the family tree.
+							The parent function is necessary to define the tree structure so that each node has a unique parent. The function is defined as follows:
+						</p>
+						<div style="text-align:center; margin-top: 12px;">
+						$$\operatorname{par}(P) :=
+						\begin{cases}
+							\operatorname{emb}\!\big(P, \operatorname{larg}(P)\big),
+							& \text{if $P$ has an embeddable vertex},\\[4pt]
+							\operatorname{ins}\!\big(P, \operatorname{cloe}(P, \operatorname{clop}(P)), \operatorname{clop}(P)\big),
+							& \text{otherwise.}
+						\end{cases}
+						$$
+						</div>
+						<p>The two cases are pretty straightforward, the parent function will first try embed the largest vertex, i.e., the last vertex visited on a walk
+							along the polygon in counter-clockwise order. The idea is to try to straighten the polygon as much as possible before trying to add outside vertices.
+							If there are no embeddable vertices at all, then we insert the closest outside point into the polygon by using helper functions previously defined like 
+							<code>cloe(P,p)</code> and <code>clop(P)</code> to determine which point to insert and where to insert it. Because we setup these rules it allows us to avoid having 
+							multiple parents for a single node, which is crucial.
+						</p>
+
+						<p>
+							Starting from any at-most-k-out polygon P, we can repeatedly apply the parent function to get a kind of chain of polygons which is called 
+							a <strong>parent sequence</strong>. This sequence will always end at the root of the three, which is the convex hull <strong><code>CH(S)</code></strong>.
+							By merging all of these sequences together for every possible at-most-k-out polygon, we get the full family tree of at-most-k-out polygons joined at the root. 
+							Then simply by inversing the direction of the arrows we get a tree where the edges point from parent to child.
+						</p>
 				</div>
 			</section>
         </main>
