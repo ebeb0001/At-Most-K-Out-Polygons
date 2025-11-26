@@ -240,7 +240,9 @@ function mousePressed() {
 	if (state.mode == 'add') {
 		saveHistory();
 		state.points.push(new geometry.Point(mouseX, mouseY));
-		state.points = geometry.generalPosition(state.points);
+		if (state.points.length > 1) {
+			state.points = geometry.generalPosition(state.points);
+		}
 		drawAndStats();
 	} else if (state.mode == 'drag' && dragIndex == -1) {
 		dragIndex = findNearestPoint(mouseX, mouseY);
