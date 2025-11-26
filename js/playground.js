@@ -54,7 +54,7 @@ function saveHistory() {
 	if (state.history.length > 200) {
 		state.history.shift();
 	}
-	console.log(state.history);
+	// console.log(state.history);
 	state.future = [];
 }
 
@@ -65,7 +65,7 @@ function undo() {
 	state.future.push(JSON.stringify(state.points));
 	state.points = JSON.parse(state.history.pop());
 	state.points = state.points.map((p) => new geometry.Point(p.x, p.y));
-	console.log(state.points);
+	// console.log(state.points);
 	drawAndStats();
 }
 
