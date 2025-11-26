@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>At most K-out pollygons- Algorithm</title>
+		<title>At most K-out polygons - Algorithm</title>
 		<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
 		<link rel="stylesheet" href="../styling.css" />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,7 +24,7 @@
 				<a href="../index.html">Home</a>
 				<a href="./playground.html">Playground</a>
 				<a href="./algorithm.html" >Algorithm</a>
-				<a href="./about.html" onclick="alert('This demo focuses on the Playground page.'); return false;">About</a>
+				<a href="./about.html">About</a>
 			</nav>
 		</header>
 
@@ -142,6 +142,46 @@
 							By merging all of these sequences together for every possible at-most-k-out polygon, we get the full family tree of at-most-k-out polygons joined at the root. 
 							Then simply by inversing the direction of the arrows we get a tree where the edges point from parent to child.
 						</p>
+
+						<h3>Children Function</h3>
+						<p>So now that we have a way of getting to the parent of any polygon, we need a way to get, for a given polygon P, all of the children whose parent is P.
+							We will define two helper functions, <strong><code>dig()</code></strong> and <strong><code>remove()</code></strong>.
+						</p>
+
+						<h3>Dig Function</h3>
+						<p>The <strong><code>dig()</code></strong> function is the opposite of the embed operation. It takes a digable pair (p<sub>i</sub>, p) of a polygon P and removes the edge (p<sub>i</sub>, succ(p<sub>i</sub>)) to create two
+							new edges (p<sub>i</sub>, p) and (p, succ(p<sub>i</sub>)). This operation adds a new vertex p to the polygon P while keeping it simple and maintaining the at-most-k-out property. It was mentioned
+							that it's the opposite of embed because if we were to apply embed on the newly created polygon at vertex p, we would get back the original polygon P.
+						</p>
+
+						<h3>Remove Function</h3>
+						<p>
+						The <strong><code>rmv()</code></strong> function is the opposite of the insert operation. By taking a vertex <strong>p</strong> of the polygon P as well as its neighbours
+						<em>pred(p<sub>i</sub>)</em> and <em>succ(p<sub>i</sub>)</em>, we can create a triangle formed by these three points. If this triangle lies inside of P and contains no points from the
+						set of points <em><strong>S</strong></em> and the size of the set <strong><code>out(P)</code></strong> strictly less than <strong>k</strong>, then we can remove the two edges
+						<em>(pred(p<sub>i</sub>), p<sub>i</sub>)</em> and <em>(p<sub>i</sub>, succ(p<sub>i</sub>))</em> and replace them with a single edge <em>(pred(p<sub>i</sub>) to succ(p<sub>i</sub>))</em>.
+						This operation removes the vertex <strong>p</strong> from the polygon P and increases the size of the set <strong><code>out(P)</code></strong> by one, while keeping the polygon simple and maintaining the at-most-k-out property.
+						</p>
+
+						<h3>Active Children</h3>
+						<p>A move is called active if it can be reversed by applying the parent function. In other words, a digable pair (p<sub>i</sub>, p) of a polygon P is active if
+						applying the parent function to the polygon obtained by <strong>digging</strong> at (p<sub>i</sub>, p) returns the original polygon P. Similarly, a vertex p of a polygon P is active if
+						applying the parent function to the polygon obtained by <strong>removing</strong> p returns the original polygon P. It's just a way to show that the move is valid and can be reversed, it's like a DNA test for moves.
+						</p>	
+
+						<h3>Enumeration / Traversal</h3>
+						<p>
+						Now that we have all of the necessary building blocks, we can finally explain how to enumerate all of the at-most-k-out polygons. The idea is to do a depth-first traversal of the tree
+						starting from the root, which is the convex hull <strong><code>CH(S)</code></strong> as previously explained. At each polygon P we will generate its children by applying the <strong>dig()</strong> and <strong>rmv()</strong>
+						functions on all possible active digable pairs and active vertices respectively. This will generate all of the children of P which will be filtered to keep only the active ones. Then we will recursively apply the same process to each child polygon until all polygons have been visited.
+						The algorithm used to traverse the tree is a standard DFS.
+						</p>
+
+						<p>
+							Once the tree has been fully generated and traversed, we will have enumerated all of the at-most-k-out polygons for the given point set S. This algorithm is efficient because it avoids generating duplicate polygons and only visits each polygon once.
+						</p>
+
+
 				</div>
 			</section>
         </main>
