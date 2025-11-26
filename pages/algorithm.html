@@ -101,7 +101,7 @@
 						<p>When a polygon <strong><code>P</code></strong> has more than one embeddable vertex, we need a way that is consistent to find which one to embed first. To achieve this we assume the vertices of <strong><code>P</code></strong> are
 						ordered in counter-clockwise order, starting from a fixed point. If we do a walk on the polygon in this order and mark every single embeddable vertex,
 						the <strong>largest embeddable vertex</strong> is defined as the embeddable vertex with the highest index in this order, i.e. the last embeddable vertex we find in our walk. This is the corner 
-						we will emebed first when doing the parent function <strong><code>par(P)</code></strong>.</p>
+						we will embed first when doing the parent function <strong><code>par(P)</code></strong>.</p>
 
 						<h3>Insertable Outside Point</h3>
 						<p>As explained in the insertable section, there are conditions to be able to insert a point from <strong><code>out(P)</code></strong> into the polygon <strong><code>P</code></strong>.
@@ -109,14 +109,14 @@
 						points that can be inserted into <strong><code>P</code></strong> without violating the at-most-k-out property. </p>
 
 						<h3>Closest Outside Point</h3>
-						<p>Among all of the instertable outside points, we still need a way to choose one in a deterministic way. The method used is to iterate over
-							the the insertable points <strong><code>p</code></strong>, then look at the edge where they would be inserted (by using <strong><code>cloe(P,p)</code></strong> which is the closest edge insertable from <strong><code>p</code></strong>), and measure the distance from the point to that
-							edge. We measure it by using Euclidean distance to the midpoint to the edge from the point <strong><code>p</code></strong>. Then we define <strong><code>clop(P)</code></strong> as the point with the smallest distance. This is the point we will insert when <strong><code>P</code></strong> has 
-							no embeddable vertices adn we want to move to its parent.
+						<p>Among all of the insertable outside points, we still need a way to choose one in a deterministic way. The method used is to iterate over
+							the insertable points <strong><code>p</code></strong>, then look at the edge where they would be inserted (by using <strong><code>cloe(P,p)</code></strong> which is the closest edge insertable from <strong><code>p</code></strong>), and measure the distance from the point to that
+							edge. We measure it by using Euclidean distance to the midpoint of the edge from the point <strong><code>p</code></strong>. Then we define <strong><code>clop(P)</code></strong> as the point with the smallest distance. This is the point we will insert when <strong><code>P</code></strong> has 
+							no embeddable vertices and we want to move to its parent.
 						</p>
 
 						<h3>Parent Function</h3>
-						<p>Now that we introduced all of the local moves to move inside of the tree, we can introduce the parent function <code>par(P)</code> that is used to navigate the family tree.
+						<p>Now that we introduced all of the local moves to move inside of the tree, we can introduce the <strong>parent function</strong> <strong><code>par(P)</code></strong> that is used to navigate the family tree.
 							The parent function is necessary to define the tree structure so that each node has a unique parent. The function is defined as follows:
 						</p>
 						<div style="text-align:center; margin-top: 12px;">
@@ -137,48 +137,49 @@
 						</p>
 
 						<p>
-							Starting from any at-most-k-out polygon P, we can repeatedly apply the parent function to get a kind of chain of polygons which is called 
-							a <strong>parent sequence</strong>. This sequence will always end at the root of the three, which is the convex hull <strong><code>CH(S)</code></strong>.
-							By merging all of these sequences together for every possible at-most-k-out polygon, we get the full family tree of at-most-k-out polygons joined at the root. 
+							Starting from any at-most-k-out polygon <strong><code>P</code></strong>, we can repeatedly apply the parent function to get a kind of chain of polygons which is called 
+							a <strong>parent sequence</strong>. This sequence will always end at the root of the tree, which is the convex hull <strong><code>CH(S)</code></strong>.
+							By merging all of these sequences together for every possible at-most-k-out polygon, we get the full <strong>family tree</strong> of at-most-k-out polygons joined at the root. 
 							Then simply by inversing the direction of the arrows we get a tree where the edges point from parent to child.
 						</p>
 
 						<h3>Children Function</h3>
-						<p>So now that we have a way of getting to the parent of any polygon, we need a way to get, for a given polygon P, all of the children whose parent is P.
+						<p>So now that we have a way of getting to the parent of any polygon, we need a way to get, for a given polygon <strong><code>P</code></strong>, all of the <strong>children</strong> whose parent is <strong><code>P</code></strong>.
 							We will define two helper functions, <strong><code>dig()</code></strong> and <strong><code>remove()</code></strong>.
 						</p>
 
 						<h3>Dig Function</h3>
-						<p>The <strong><code>dig()</code></strong> function is the opposite of the embed operation. It takes a digable pair (p<sub>i</sub>, p) of a polygon P and removes the edge (p<sub>i</sub>, succ(p<sub>i</sub>)) to create two
-							new edges (p<sub>i</sub>, p) and (p, succ(p<sub>i</sub>)). This operation adds a new vertex p to the polygon P while keeping it simple and maintaining the at-most-k-out property. It was mentioned
-							that it's the opposite of embed because if we were to apply embed on the newly created polygon at vertex p, we would get back the original polygon P.
+						<p>The <strong><code>dig()</code></strong> function is the opposite of the embed operation. It takes a <strong>digable pair</strong> <strong>(p<sub>i</sub>, p)</strong> of a polygon<strong><code>P</code></strong>and removes the edge (p<sub>i</sub>, succ(p<sub>i</sub>)) to create two
+							new edges (p<sub>i</sub>, p) and (p, succ(p<sub>i</sub>)). This operation adds a new vertex <strong><code>p</code></strong> to the polygon <strong><code>P</code></strong> while keeping it simple and maintaining the at-most-k-out property. It was mentioned
+							that it's the opposite of embed because if we were to apply embed on the newly created polygon at vertex <strong><code>p</code></strong>, we would get back the original polygon <strong><code>P</code></strong>.
 						</p>
 
 						<h3>Remove Function</h3>
 						<p>
-						The <strong><code>rmv()</code></strong> function is the opposite of the insert operation. By taking a vertex <strong>p</strong> of the polygon P as well as its neighbours
-						<em>pred(p<sub>i</sub>)</em> and <em>succ(p<sub>i</sub>)</em>, we can create a triangle formed by these three points. If this triangle lies inside of P and contains no points from the
-						set of points <em><strong>S</strong></em> and the size of the set <strong><code>out(P)</code></strong> strictly less than <strong>k</strong>, then we can remove the two edges
-						<em>(pred(p<sub>i</sub>), p<sub>i</sub>)</em> and <em>(p<sub>i</sub>, succ(p<sub>i</sub>))</em> and replace them with a single edge <em>(pred(p<sub>i</sub>) to succ(p<sub>i</sub>))</em>.
-						This operation removes the vertex <strong>p</strong> from the polygon P and increases the size of the set <strong><code>out(P)</code></strong> by one, while keeping the polygon simple and maintaining the at-most-k-out property.
+							The <strong><code>rmv()</code></strong> function is the opposite of the insert operation. By taking a vertex <strong><code>p</code></strong> of the polygon <strong><code>P</code></strong> as well as its neighbours
+							<em><code>pred(p<sub>i</sub>)</code></em> and <em><code>succ(p<sub>i</sub>)</code></em>, we can create a triangle formed by these three points. If this triangle lies inside of <strong><code>P</code></strong> and contains no points from the
+							set of points <em><strong><code>S</code></strong></em> and the size of the set <strong><code>out(P)</code></strong> strictly less than <strong><code>k</code></strong>, then we can remove the two edges
+							<em>(pred(p<sub>i</sub>), p<sub>i</sub>)</em> and <em>(p<sub>i</sub>, succ(p<sub>i</sub>))</em> and replace them with a single edge <em>(pred(p<sub>i</sub>) to succ(p<sub>i</sub>))</em>.
+							This operation removes the vertex <strong><code>p</code></strong> from the polygon <strong><code>P</code></strong> and increases the size of the set <strong><code>out(P)</code></strong> by one, while keeping the polygon simple and maintaining the at-most-k-out property.
 						</p>
 
 						<h3>Active Children</h3>
-						<p>A move is called active if it can be reversed by applying the parent function. In other words, a digable pair (p<sub>i</sub>, p) of a polygon P is active if
-						applying the parent function to the polygon obtained by <strong>digging</strong> at (p<sub>i</sub>, p) returns the original polygon P. Similarly, a vertex p of a polygon P is active if
-						applying the parent function to the polygon obtained by <strong>removing</strong> p returns the original polygon P. It's just a way to show that the move is valid and can be reversed, it's like a DNA test for moves.
+						<p>A move is called <strong>active</strong> if it can be reversed by applying the parent function. In other words, a digable pair <strong>(p<sub>i</sub>, p)</strong> of a polygon <strong><code>P</code></strong> is active if
+							applying the parent function to the polygon obtained by <strong>digging</strong> at <strong>(p<sub>i</sub>, p)</strong> returns the original polygon <strong><code>P</code></strong>. Similarly, a vertex <strong><code>p</code></strong> of a polygon <strong><code>P</code></strong> is active if
+							applying the parent function to the polygon obtained by <strong>removing</strong> <strong><code>p</code></strong> returns the original polygon <strong><code>P</code></strong>. It's just a way to show that the move is valid and can be reversed, it's like a <em>DNA test for moves</em>.
 						</p>	
+
 
 						<h3>Enumeration / Traversal</h3>
 						<p>
-						Now that we have all of the necessary building blocks, we can finally explain how to enumerate all of the at-most-k-out polygons. The idea is to do a depth-first traversal of the tree
-						starting from the root, which is the convex hull <strong><code>CH(S)</code></strong> as previously explained. At each polygon P we will generate its children by applying the <strong>dig()</strong> and <strong>rmv()</strong>
-						functions on all possible active digable pairs and active vertices respectively. This will generate all of the children of P. Then we will recursively apply the same process to each child polygon until all polygons have been visited.
-						The algorithm used to traverse the tree is a standard DFS.
+						Now that we have all of the necessary building blocks, we can finally explain how to enumerate all of the <strong>at-most-k-out polygons</strong>. The idea is to do a <strong>depth-first traversal</strong> of the tree
+						starting from the root, which is the convex hull <strong><code>CH(S)</code></strong> as previously explained. At each polygon <strong><code>P</code></strong> we will generate its children by applying the <strong><code>dig()</code></strong> and <strong><code>rmv()</code></strong>
+						functions on all possible active digable pairs and active vertices respectively. This will generate all of the children of <strong><code>P</code></strong>. Then we will recursively apply the same process to each child polygon until all polygons have been visited.
+						The algorithm used to traverse the tree is a standard <strong>DFS</strong>.
 						</p>
 
 						<p>
-							Once the tree has been fully generated and traversed, we will have enumerated all of the at-most-k-out polygons for the given point set S. The reason why this algorithm is efficient is thanks to the fact that there are no duplicates and that we traverse each polygon only once.
+							Once the tree has been fully generated and traversed, we will have enumerated all of the at-most-k-out polygons for the given point set <strong><code>S</code></strong>. The reason why this algorithm is efficient is thanks to the fact that there are no duplicates and that we traverse each polygon only once.
 						</p>
 
 
