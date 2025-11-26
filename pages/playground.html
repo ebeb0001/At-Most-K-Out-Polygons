@@ -76,10 +76,10 @@
 					<h3>Statistics</h3>
 					<div class="stats">
 						<div><span>n</span><b id="stat-n">0</b></div>
-						<div><span>k</span><b id="stat-k">2</b></div>
+						<div><span>Polygons</span><b id="stat-p">0</b></div>
 						<div><span>Hull</span><b id="stat-h">0</b></div>
-						<div><span>Inside</span><b id="stat-in">0</b></div>
-						<div><span>Ouside</span><b id="stat-out">0</b></div>
+						<div><span>In</span><b id="stat-in">0</b></div>
+						<div><span>Out</span><b id="stat-out">0</b></div>
 					</div>
 				</aside>
 
@@ -100,7 +100,11 @@
 		</main>
 
 		<footer class="site-footer">
-			<p>© <span id="year"></span> At Most k-Out Polygons</p>
+			<p>© <span id="year">
+				<script>
+					document.getElementById("year").textContent = new Date().getFullYear();
+				</script>
+				</span> At Most k-Out Polygons</p>
 		</footer>
 	</body>
 </html>

@@ -14,6 +14,8 @@ const state = {
 	future: [],
 	polygons : [],
 	hull : [],
+	history : [],
+	future : [],
 	idx : -1
 };
 
@@ -21,17 +23,15 @@ let canvas;
 let dragIndex = -1;
 
 function setRandomPreset(nb_points) {
-	const points = [];	
-	const EPS = 1e-9;
+	const points = [];
 	for (let i = 0; i < nb_points; i++) {
 		const p = new geometry.Point(
 			Math.floor(Math.random() * (width + 1)), 
 			Math.floor(Math.random() * (height + 1))
 		);
-		if (points.some(q => Math.abs(q.y - p.y) < EPS)) { p.y += EPS; }
 		points.push(p);
 	}
-	return points;
+	return geometry.generalPosition(points);
 }
 
 function clearCanvas() {
@@ -42,8 +42,40 @@ function clearCanvas() {
 	state.outside = [];
 	state.hull = [];
 	state.polygons = [];
+	state.history = [];
+	state.future = [];
 	state.idx = -1;
 	setCanvasMode('add');
+	drawAndStats();
+}
+
+function saveHistory() {
+	state.history.push(JSON.stringify(state.points));
+	if (state.history.length > 200) {
+		state.history.shift();
+	}
+	console.log(state.history);
+	state.future = [];
+}
+
+function undo() {
+	if (state.history.length == 0) {
+		return;
+	}
+	state.future.push(JSON.stringify(state.points));
+	state.points = JSON.parse(state.history.pop());
+	state.points = state.points.map((p) => new geometry.Point(p.x, p.y));
+	console.log(state.points);
+	drawAndStats();
+}
+
+function redo() {
+	if (state.history.length == 0) {
+		return;
+	}
+	state.history.push(JSON.stringify(state.points));
+	state.points = JSON.parse(state.future.pop());
+	state.points = state.points.map((p) => new geometry.Point(p.x, p.y));
 	drawAndStats();
 }
 
@@ -54,7 +86,6 @@ window.addEventListener('load', () => {
 	$('kRange').addEventListener('input', (e) => {
 		state.k = parseInt(e.target.value, 10);
 		$('kValue').textContent = state.k;
-		$('stat-k').textContent = state.k;
 	});
 
 	$('mode-view').addEventListener('click', () => setCanvasMode('view'));
@@ -63,6 +94,7 @@ window.addEventListener('load', () => {
 	$('mode-delete').addEventListener('click', () => setCanvasMode('delete'));
 
 	$('btn-random').addEventListener('click', () => { 
+		saveHistory();
 		state.points = setRandomPreset(Math.floor(Math.random() * 16));
 		setPrimaryButton('rand');
 		drawAndStats(); 
@@ -70,7 +102,7 @@ window.addEventListener('load', () => {
 
 	$('btn-k-out').addEventListener('click', () => {
 		setPrimaryButton('k-out');
-		if (state.polygons.length === 0 && state.hull != null) {
+		if (state.polygons.length == 0 && state.hull != null) {
 			state.polygons = enumarator.enumerateAtMostKOutPolygons(state.points, state.k);
 			state.idx = 0;
 		} else { state.idx = (state.idx + 1) % state.polygons.length; }
@@ -79,12 +111,12 @@ window.addEventListener('load', () => {
 
 	$('btn-undo').addEventListener('click', () => { 
 		setPrimaryButton('undo');
-		drawAndStats(); 
+		undo(); 
 	});
 
 	$('btn-redo').addEventListener('click', () => { 
 		setPrimaryButton('redo');
-		drawAndStats(); 
+		redo(); 
 	});
 
 	$('btn-clear').addEventListener('click', () => { 
@@ -114,11 +146,11 @@ function setPrimaryButton(button) {
 		elem.classList.remove('primary');
 	}
 
-	if (button === 'rand') $('btn-random').classList.add('primary');
-	else if (button === 'k-out') $('btn-k-out').classList.add('primary');
-	else if (button === 'undo') $('btn-undo').classList.add('primary');  
-	else if (button === 'redo') $('btn-redo').classList.add('primary');
-	else if (button === 'clear') $('btn-clear').classList.add('primary');
+	if (button == 'rand') $('btn-random').classList.add('primary');
+	else if (button == 'k-out') $('btn-k-out').classList.add('primary');
+	else if (button == 'undo') $('btn-undo').classList.add('primary');  
+	else if (button == 'redo') $('btn-redo').classList.add('primary');
+	else if (button == 'clear') $('btn-clear').classList.add('primary');
 }
 
 function setCanvasMode(mode) {
@@ -127,10 +159,10 @@ function setCanvasMode(mode) {
 		elem.classList.remove('active');
 	}
 
-	if (mode === 'view') { $('mode-view').classList.add('active'); }
-	else if (mode === 'add') { $('mode-edit').classList.add('active'); }
-	else if (mode === 'drag') { $('mode-drag').classList.add('active'); }  
-	else if (mode === 'delete') { $('mode-delete').classList.add('active'); }
+	if (mode == 'view') { $('mode-view').classList.add('active'); }
+	else if (mode == 'add') { $('mode-edit').classList.add('active'); }
+	else if (mode == 'drag') { $('mode-drag').classList.add('active'); }  
+	else if (mode == 'delete') { $('mode-delete').classList.add('active'); }
 }
 
 function setup() {
@@ -201,18 +233,21 @@ function mousePressed() {
 	const insideCanvas = mouseX >= 0 && mouseX <= width 
 	&& mouseY >= 0 && mouseY <= height;
 	if (!insideCanvas) return;
-	if (state.mode !== 'view') {
+	if (state.mode != 'view') {
 		state.polygons = [];
 		state.idx = -1;
 	}
-	if (state.mode === 'add') {
+	if (state.mode == 'add') {
+		saveHistory();
 		state.points.push(new geometry.Point(mouseX, mouseY));
+		state.points = geometry.generalPosition(state.points);
 		drawAndStats();
-	} else if (state.mode === 'drag' && dragIndex === -1) {
+	} else if (state.mode == 'drag' && dragIndex == -1) {
 		dragIndex = findNearestPoint(mouseX, mouseY);
-	} else if (state.mode === 'delete') {
+	} else if (state.mode == 'delete') {
+		saveHistory();
 		const idx = findNearestPoint(mouseX, mouseY);
-		if (idx !== -1) {
+		if (idx != -1) {
 			state.points.splice(idx, 1);
 			drawAndStats();
 		}
@@ -220,11 +255,11 @@ function mousePressed() {
 }
 
 function mouseDragged() {
-	if (state.mode !== 'view') {
+	if (state.mode != 'view') {
 		state.polygons = [];
 		state.idx = -1;
 	}
-	if (state.mode === 'drag' && dragIndex !== -1) {
+	if (state.mode == 'drag' && dragIndex != -1) {
 		state.points[dragIndex].x = mouseX;
 		state.points[dragIndex].y = mouseY;
 		drawAndStats();
@@ -232,7 +267,8 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-	if (state.mode === 'drag' && dragIndex !== -1) {
+	if (state.mode == 'drag' && dragIndex != -1) {
+		saveHistory()
 		dragIndex = -1;
 		state.points = geometry.sortPoints(state.points);
 		drawAndStats();
@@ -241,7 +277,7 @@ function mouseReleased() {
 
 function updateStats() {
 	$('stat-n').textContent = state.points.length;
-	$('stat-k').textContent = state.k;
+	$('stat-p').textContent = state.polygons.length;
 
 	if (state.points.length >= 3) {
 		let polygon = null;
@@ -259,8 +295,8 @@ function updateStats() {
 	$('stat-in').textContent = state.inside.length;
 	$('stat-out').textContent = state.outside.length;
 
-	if (state.showLabels && state.points.length > 0 && state.mode !== 'drag') {
-		if (state.hull.length === 0) return;
+	if (state.showLabels && state.points.length > 0 && state.mode != 'drag') {
+		if (state.hull.length == 0) return;
 		state.hull = state.hull;
 		const rest = state.points.filter((p) => !state.hull.includes(p));
 		state.points = state.hull.concat(rest);

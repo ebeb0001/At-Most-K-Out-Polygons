@@ -1,6 +1,7 @@
 import * as geometry from './geometry.js';
 
 export function enumerateAtMostKOutPolygons(points, k) {
+	// points = geometry.generalPosition(points);
 	let hull = geometry.convexHullGrahamScan(points);
 	k = Math.min(k, points.length - 3);
 	let tree = findChildren(points, hull, null, 0, [], k);
@@ -8,7 +9,10 @@ export function enumerateAtMostKOutPolygons(points, k) {
 	return tree;
 }
 
-export function findChildren(points, polygon, p_j, embeddable_vertices, children, k) {
+export function findChildren(points, polygon, p_j, embeddable_vertices, children, k, nb_outside_points) {
+	if (nb_outside_points > k) {
+		return children;
+	}
 	children.push(polygon);
 	console.log("new polygon", polygon);
 	let q = null;
@@ -24,7 +28,7 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 					child = geometry.dig(p_i, p, polygon, points);
 					outside_points = geometry.insideOutsidePoints(points, polygon, false);
 					embeddable_vertices = geometry.embeddableVertices(child, outside_points);
-					findChildren(points, child, p_i, embeddable_vertices, children, k);
+					findChildren(points, child, p_i, embeddable_vertices, children, k, outside_points.length);
 				}
 			}
 		}
@@ -34,7 +38,7 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 			child = geometry.rmv(polygon, p_i, outside_points, points, k);
 			outside_points = geometry.insideOutsidePoints(points, polygon, false);
 			embeddable_vertices = geometry.embeddableVertices(child, outside_points);
-			findChildren(points, child, null, embeddable_vertices, children, k);
+			findChildren(points, child, null, embeddable_vertices, children, k, outside_points.length);
 		}
 	}
 	console.log("end");

@@ -31,13 +31,66 @@
 			<section class="hero card">
 				<div>
 					<h2>Welcome to At-Most-K-Out polygons</h2>
-					<p>Learn more about At-Most-K-Out polygons and their relationship between convex hulls and surrounding polygons</p>
+					<p>
+						Given a finite set of points <strong>S</strong>, in the plane, a <strong>simple polygon</strong>
+						of S is a non-self-intersecting polygon whose vertices are points from S. An 
+						<strong>at most k-out polygon</strong> is such a polygon in which at most <strong>k</strong>
+						points of S lie outside the polygon. All other points are either vertices or lie inside its 
+						interior.
+					</p>
+					<p>
+						This concept conveniently connects different well-known classes of polygons:
+					</p>
+					<ul>
+						<li><strong>k = 0</strong>: surrounding polygons of S (all points are inside or 
+							on the boundary)</li>
+						<li><strong>k = n - 3</strong>: all simple polygonizations of S</li>
+					</ul>
+				</div>
+			</section>
+
+			<section class="hero card">
+				<div>
+					<h3>What's available on this website ?</h3>
+					<p>
+						This site a small companion to a research project on enumerating at at-most-k-out polygons.
+						It focuses on two main parts:
+					</p>
+					<ul>
+						<li>
+							<strong>Playground</strong> - an interactive canvas where you can:
+							<ul>
+								<li>Draw point sets</li>
+								<li>Choose a value for <strong>k</strong></li>
+								<li>Run the enumerator to see all at most k-out polygons it finds</li>
+								<li>Inspect statistics like the number of polygons, th number of 
+									inside/outside points and more</li>
+							</ul>
+						</li>
+						<li>
+							<strong>Algorithm</strong> - a more theoritical page that explains:
+							<ul>
+								<li>The definition of at most k-out polygons</li>
+								<li>The parent child structure between polygons</li>
+								<li>the operations used by the algorithm</li>
+								<li>How the implementation explores the "family tree" of polygons</li>
+							</ul>
+						</li>
+					</ul>
+					<p>
+						There is also an <strong>About</strong> link with a short note about us, the demo and the 
+						reference work we used to create this webpage.
+					</p>
 				</div>
 			</section>
 		</main>
 
 		<footer class="site-footer">
-			<p>© <span id="year"></span> At Most k-Out Polygons</p>
+			<p>© <span id="year">
+				<script>
+					document.getElementById("year").textContent = new Date().getFullYear();
+				</script>
+				</span> At Most k-Out Polygons</p>
 		</footer>
 	</body>
 </html>
