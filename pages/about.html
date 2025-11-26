@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>At most K-out polygons - About</title>
 		<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
-		<link rel="stylesheet" href="./styling.css" />
+		<link rel="stylesheet" href="../styling.css" />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -28,7 +28,92 @@
 		</header>
 
 		<main class="container">
+			<section class="hero card">
+				<div>
+					<h2>Project authors</h2>
+					<p>
+						This project was created as part of an academic exploration of <strong>at most k-out 
+						polygons</strong> , combining theoritical analysis with a full interactive implementation.
+					</p>
+					<ul>
+						<li><strong>Ethan Bebelambou</strong> - Implementation</li>
+						<li><strong>Ziyad Haltout Rhouni</strong> - Theoritical analysis</li>
+					</ul>
+				</div>
+			</section>
 
+			<section class="hero card">
+				<div>
+					<div>
+						<h3>Work distribution</h3>
+						<p>
+							The work on this project was divided between the theoritical foundation and 
+							the development of the interactive enumerator:
+						</p>
+						<ul>
+							<li>
+								<strong>Ethan Bebelambou</strong> implemented the enumeration algorithm, point-set editor, 
+								polygon operations and all visualization components
+							</li>
+							<li>
+								<strong>Ziyad Haltout Rhouni</strong> focused on the theoritical part of the project: understanding 
+								the definitions, analyzing the enumeration algorithm, and verifying the geometric conditions such 
+								as instertability, digability, and embeddability in the implementation.
+							</li>
+						</ul>
+					</div>
+
+					<div>
+						<h3>Notes on implementation</h3>
+						<p>
+							The implementation presented on this webpage is faithful to the algorithm described in the paper,
+							but with two important differences:
+						</p>
+						<ul>
+							<li>
+								We <strong>did not perform the preprocessing steps</strong> suggested in the original paper.
+							</li>
+							<li>
+								One of the condition in the loops of the enumeration algorithm (<em>q ≺ p<sub>i</sub></em>)
+								made it impossible to reach all at most k-out polygons in practice. After investigation, we
+								removed that condition, and this resolved the issue.
+								As a result, our implementation is <strong>slightly from the exact formal version</strong> 
+								described in the paper, but produces the complete family of polygons as expected.
+							</li>
+						</ul>
+						<p>
+							These differences do not changes the conceptual nature of the algorithm, bu they modify the 
+							enumeration behavior enough to be worth highlighting.
+						</p>
+					</div>
+
+					<div>
+						<h3>Acknowledgements</h3>
+						<p>
+							We would like to thank the autors of the original paper for developing the concept and algorithm
+							on which this project is based.
+							<br>
+							We also acknowledge the use of <strong>LLMs</strong> to assist in webpage layout, styling of the
+							webpage and text strcturing.
+						</p>
+					</div>
+				</div>
+			</section>
+
+			<section class="hero card">
+				<div>
+					<h3>References</h3>
+					<p>The main reference of this project is:</p>
+					<ul>
+						<li>
+							Waseem Akram and Katsuhisa Yamanaka.
+							<strong>Enumerating At Most k-Out Polygons</strong>
+							In <em>Proceedings of the 40th European Workshop on Computational Geometry 
+							(EuroCG 2024)</em>, Ioannina, Greece, pp. 13:1--13:8, March 2024.
+						</li>
+					</ul>
+				</div>
+			</section>
 		</main>
 
 		<footer class="site-footer">
@@ -36,7 +121,7 @@
 				<script>
 					document.getElementById("year").textContent = new Date().getFullYear();
 				</script>
-				</span> At Most k-Out Polygons</p>
+				</span>At Most k-Out Polygons</p>
 		</footer>
 	</body>
 </html>
