@@ -98,8 +98,14 @@
 						creating a temporary triangle and if this triangle doesn't include other outside points and doesn't intersect P then we can add that point as a new vertex of the polygon P. </p>
 
 						<h3>Largest Embeddable Vertex</h3>
-						<h3>Insetable Outside Point</h3>
-						<h3>Closest Outside Point</h3>
+						When a polygoon P has more than one embeddable vertex, we need a way that is consistent to find which one to embed first. To achieve this we assume the vertices of P are
+						ordered in counter-clockwise order, starting from a fixed point. If we do a walk on the polygon in this order and mark every single embeddable vertex,
+						the largest embeddable vertex is defined as the embeddable vertex with the highest index in this order, i.e. the last embeddable vertex we find in our walk. This is the corner 
+						we will emebed first when doing the parent function par(P).
+						<h3>Insertable Outside Point</h3>
+						As explained in the insertable section, there are conditions to be able to insert a point from <strong><code>out(P)</code></strong> into the polygon P.
+						The set of points that satisfy the conditions are called insertable outisde points, so <strong><code>iout(P)</code></strong> contains exactly the outside
+						points that can be inserted into P without violating the at-most-k-out property.
 				</div>
 			</section>
         </main>
