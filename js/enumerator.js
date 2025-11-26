@@ -5,7 +5,6 @@ export function enumerateAtMostKOutPolygons(points, k) {
 	let hull = geometry.convexHullGrahamScan(points);
 	k = Math.min(k, points.length - 3);
 	let tree = findChildren(points, hull, null, 0, [], k);
-	console.log("size of tree", tree.length);
 	return tree;
 }
 
@@ -14,7 +13,6 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 		return children;
 	}
 	children.push(polygon);
-	console.log("new polygon", polygon);
 	let q = null;
 	let outside_points = geometry.insideOutsidePoints(points, polygon, false);
 	let child = null;
@@ -41,6 +39,5 @@ export function findChildren(points, polygon, p_j, embeddable_vertices, children
 			findChildren(points, child, null, embeddable_vertices, children, k, outside_points.length);
 		}
 	}
-	console.log("end");
 	return children;
 }
