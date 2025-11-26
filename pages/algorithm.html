@@ -173,12 +173,12 @@
 						<p>
 						Now that we have all of the necessary building blocks, we can finally explain how to enumerate all of the at-most-k-out polygons. The idea is to do a depth-first traversal of the tree
 						starting from the root, which is the convex hull <strong><code>CH(S)</code></strong> as previously explained. At each polygon P we will generate its children by applying the <strong>dig()</strong> and <strong>rmv()</strong>
-						functions on all possible active digable pairs and active vertices respectively. This will generate all of the children of P which will be filtered to keep only the active ones. Then we will recursively apply the same process to each child polygon until all polygons have been visited.
+						functions on all possible active digable pairs and active vertices respectively. This will generate all of the children of P. Then we will recursively apply the same process to each child polygon until all polygons have been visited.
 						The algorithm used to traverse the tree is a standard DFS.
 						</p>
 
 						<p>
-							Once the tree has been fully generated and traversed, we will have enumerated all of the at-most-k-out polygons for the given point set S. This algorithm is efficient because it avoids generating duplicate polygons and only visits each polygon once.
+							Once the tree has been fully generated and traversed, we will have enumerated all of the at-most-k-out polygons for the given point set S. The reason why this algorithm is efficient is thanks to the fact that there are no duplicates and that we traverse each polygon only once.
 						</p>
 
 
