@@ -265,8 +265,8 @@ export function generalPosition(points) {
 	const EPS = 1e-9;
 	let new_points = [];
 	for (const p of points) {
-		if (points.some(q => Math.abs(q.y - p.y) < EPS)) { p.y += EPS; }
-		if (points.some(q => Math.abs(q.x - p.x) < EPS)) { p.x += EPS; }
+		while (points.some(q => Math.abs(q.y - p.y) < EPS)) { p.y += EPS; }
+		while (points.some(q => Math.abs(q.x - p.x) < EPS)) { p.x += EPS; }
 		new_points.push(p);
 	}
 	return new_points;
